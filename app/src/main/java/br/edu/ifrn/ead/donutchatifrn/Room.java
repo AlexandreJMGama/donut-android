@@ -5,6 +5,7 @@ package br.edu.ifrn.ead.donutchatifrn;
  */
 
 public class Room {
+
     int id;
     int suapID;
     int year;

@@ -47,13 +47,13 @@ public class InfoActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         //setar os tabs aqui
-        tabLayout.addTab(tabLayout.newTab().setText("Inicio"));
-        tabLayout.addTab(tabLayout.newTab().setText("Informações"));
+        tabLayout.addTab(tabLayout.newTab().setText("Salas"));
+        tabLayout.addTab(tabLayout.newTab().setText("Usuario"));
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         //setar os fragments aqui
-        mSectionsPagerAdapter.addFragment(new HomeFragment());
-        mSectionsPagerAdapter.addFragment(new InforFragment());
+        mSectionsPagerAdapter.addFragment(new RoomsFragment());
+        mSectionsPagerAdapter.addFragment(new UserMeFragment());
 
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -76,6 +76,8 @@ public class InfoActivity extends AppCompatActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            return true;
+        }else if (id == R.id.about){
             return true;
         }
 

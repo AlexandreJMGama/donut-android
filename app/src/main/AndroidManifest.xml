@@ -13,7 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" android:screenOrientation="portrait">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,6 +26,9 @@
         <activity
             android:name=".InfoActivity"
             android:label="@string/title_activity_info"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".RoomChat"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
