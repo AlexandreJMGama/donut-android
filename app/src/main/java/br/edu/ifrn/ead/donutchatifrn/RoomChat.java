@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -31,13 +32,18 @@ public class RoomChat extends AppCompatActivity implements View.OnClickListener 
 
         toolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collap);
         barLayout = (AppBarLayout) findViewById(R.id.appbarchat);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbarchat);
 
         toolbar.setOnClickListener(this);
         toolbarLayout.setOnClickListener(this);
 
         toolbar.setTitle(titleRoom);
         setSupportActionBar(toolbar);
+
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
     }
 
     @Override
@@ -49,5 +55,11 @@ public class RoomChat extends AppCompatActivity implements View.OnClickListener 
             expanded = true;
             barLayout.setExpanded(expanded);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        onBackPressed();
+        return true;
     }
 }

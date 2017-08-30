@@ -44,20 +44,10 @@ public class RoomsFragment extends Fragment {
 
         getRoomList();
 
-        /*
-                regDB = new RegDB(getContext());
-                regDB.delete();
-                Intent intent = new Intent(getContext(), MainActivity.class);
-                startActivity(intent);
-                System.exit(0);
-                ATUAL LOGOUT;
-     */
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Room roomP = (Room) adapterView.getItemAtPosition(i);
-//                Toast.makeText(getContext(), roomP.id+" - "+ roomP.title, Toast.LENGTH_LONG).show();
 
                 Intent intent = new Intent(getContext(), RoomChat.class);
                 intent.putExtra("id", roomP.id);

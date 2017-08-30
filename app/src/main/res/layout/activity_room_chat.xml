@@ -11,25 +11,24 @@
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbarchat"
-        app:expanded="false"
-        android:layout_height="160dp"
         android:fitsSystemWindows="true"
-        android:scrollbarFadeDuration="5000"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        app:expanded="false" >
 
         <net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout
             android:id="@+id/collap"
             android:theme="@style/AppTheme.AppBarOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:expandedTitleGravity="top"
+            app:expandedTitleGravity="bottom"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:expandedTitleTextAppearance="@style/TextAppearance.ExpandedTitle"
             app:maxLines="3">
 
             <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/toolbarchat"
                 android:layout_height="?attr/actionBarSize"
                 android:layout_width="match_parent"
                 app:popupTheme="@style/AppTheme.PopupOverlay"

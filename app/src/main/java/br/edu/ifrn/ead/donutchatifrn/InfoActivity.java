@@ -17,7 +17,6 @@ import java.util.List;
 
 public class InfoActivity extends AppCompatActivity {
 
-    private String usuario = null, accessToken = null;
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
     RegDB regDB;
@@ -26,20 +25,6 @@ public class InfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
-
-        regDB = new RegDB(getBaseContext());
-        Cursor cursor = regDB.carregar();
-
-        try {
-            usuario = cursor.getString(cursor.getColumnIndex(Banco.USER));
-            accessToken = cursor.getString(cursor.getColumnIndex(Banco.TOKEN));
-        }catch (Exception e){
-            //Sem dados
-        }
-
-        if (usuario != null && accessToken != null){
-            //ja logado chamar UserInfo aqui
-        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

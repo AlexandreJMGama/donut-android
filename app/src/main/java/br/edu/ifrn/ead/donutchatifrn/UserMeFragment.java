@@ -1,6 +1,5 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -18,7 +17,6 @@ import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.json.JSONObject;
 
-
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -28,11 +26,9 @@ public class UserMeFragment extends Fragment {
     private String dados;
     String  name, typeUser, url_pic;
 
-
     public UserMeFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

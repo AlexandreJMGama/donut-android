@@ -48,9 +48,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (usuario != null && accessToken != null){
-            //ja logado
-            //nova intent
-            Intent intent = new Intent(this, IntroActivity.class);
+            Intent intent = new Intent(this, InfoActivity.class);
             startActivity(intent);
             finish();
         }else {
