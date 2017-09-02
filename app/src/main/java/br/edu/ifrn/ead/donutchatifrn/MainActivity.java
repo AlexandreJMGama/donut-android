@@ -1,5 +1,6 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Fresco.initialize(this);
         setContentView(R.layout.activity_main);
+
         regDB = new RegDB(getBaseContext());
         Cursor cursor = regDB.carregar();
 
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.login, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
+                        hideKeyboard();
                         makeLogin();
                     }
                 })
@@ -90,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     passVisible = false;
                 }else {
                     passwordView.setBackground(getResources().getDrawable(R.drawable.ic_eye_green_24dp));
-                    passInput.setInputType(InputType.TYPE_CLASS_TEXT);
+                    passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                     passInput.setSelection(passInput.length());
                     passVisible = true;
                 }
@@ -198,5 +202,12 @@ public class MainActivity extends AppCompatActivity {
                 .setCancelable(true);
         alerta = builder.create();
         alerta.show();
+    }
+
+    protected void hideKeyboard() {
+        InputMethodManager inputManager = (InputMethodManager) this.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputManager.isActive()) {
+            inputManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+        }
     }
 }

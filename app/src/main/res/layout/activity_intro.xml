@@ -7,6 +7,12 @@
     android:layout_height="match_parent"
     tools:context="br.edu.ifrn.ead.donutchatifrn.IntroActivity">
 
+    <ImageView
+        android:src="@drawable/background5"
+        android:scaleType="centerCrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -15,9 +21,12 @@
         <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/my_image_view"
             android:layout_gravity="center"
+            android:layout_margin="20dp"
             android:layout_width="120dp"
             android:layout_height="120dp"
             fresco:roundAsCircle="true"
+            fresco:roundingBorderWidth="2dp"
+            fresco:roundingBorderColor="@android:color/white"
             fresco:placeholderImage="@drawable/ic_person"/>
 
             <TextView
@@ -30,6 +39,7 @@
 
             <ListView
                 android:id="@+id/lvIntro"
+                tools:listitem="@layout/room_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
