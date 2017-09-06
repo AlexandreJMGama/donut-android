@@ -83,7 +83,7 @@ class BancoListRoom extends SQLiteOpenHelper {
     static String TAB = "list_rooms";
     static String ID = "_id";
     static String eTAG = "etag";
-    static int VERSAO = 1;
+    static int VERSAO = 2;
 
     public BancoListRoom(Context context) {
         super(context, NOME_BANCO, null, VERSAO);
@@ -92,7 +92,7 @@ class BancoListRoom extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String sql = "CREATE TABLE "+ TAB +" ("+
-                ID +" INTEGER, "+
+                ID +" INTEGER PRIMARY KEY, "+
                 eTAG+" TEXT)";
 
         sqLiteDatabase.execSQL(sql);

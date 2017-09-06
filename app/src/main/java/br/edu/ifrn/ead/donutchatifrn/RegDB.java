@@ -83,11 +83,11 @@ class RegDB {
     }
 }
 
-class controlRoom {
+class ControlRoom {
     private SQLiteDatabase db;
     private BancoRoom bancoRoom;
 
-    public controlRoom (Context context){
+    public ControlRoom (Context context){
         bancoRoom = new BancoRoom(context);
     }
 
@@ -133,11 +133,11 @@ class controlRoom {
     }
 }
 
-class controlEtag {
+class ControlEtag {
     private SQLiteDatabase db;
     private BancoListRoom bancoListRoom;
 
-    public controlEtag (Context context){
+    public ControlEtag (Context context){
         bancoListRoom = new BancoListRoom(context);
     }
 
@@ -173,15 +173,22 @@ class controlEtag {
         db.close();
     }
 
-    public Cursor carregar(){
+    public Cursor carregar(int id){
         Cursor cursor;
         db = bancoListRoom.getReadableDatabase();
         String[] campos = {bancoListRoom.ID, bancoListRoom.eTAG};
-        cursor = db.query(bancoListRoom.TAB, campos, null, null, null, null, null);
+        cursor = db.rawQuery("SELECT * FROM "+ bancoListRoom.TAB +" WHERE " + bancoListRoom.ID + " = " + id, null);
 
         if (cursor != null){
-            cursor.moveToNext();
+            try {
+                cursor.moveToFirst();
+                String f1 = cursor.getString(cursor.getColumnIndex(BancoListRoom.eTAG));
+                Log.i("::CHECK", f1);
+            }catch (Exception e){
+
+            }
         }
+
         db.close();
 
         return cursor;

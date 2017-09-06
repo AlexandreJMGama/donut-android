@@ -1,5 +1,6 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -61,9 +62,10 @@ public class InfoActivity extends AppCompatActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+
         }else if (id == R.id.about){
-            return true;
+            Intent it = new Intent(this, RestService.class);
+            startService(it);
         }
 
         return super.onOptionsItemSelected(item);
