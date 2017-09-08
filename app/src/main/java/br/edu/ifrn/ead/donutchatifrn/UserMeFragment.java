@@ -50,8 +50,15 @@ public class UserMeFragment extends Fragment {
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //deleta todos os dados dos bancos
                 regDB = new RegDB(getContext());
                 regDB.delete();
+                ControlEtag controlEtag = new ControlEtag(getContext());
+                controlEtag.delete();
+                ControlRoom controlRoom = new ControlRoom(getContext());
+                controlRoom.delete();
+
+                //fim do delete
                 Intent intent = new Intent(getContext(), MainActivity.class);
                 startActivity(intent);
                 System.exit(0);

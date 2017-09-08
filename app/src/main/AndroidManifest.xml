@@ -34,7 +34,7 @@
             android:name=".RoomChat"
             android:theme="@style/AppTheme.NoActionBar"></activity>
 
-        <service android:name=".RestService" />
+        <service android:name=".RestService" android:exported="false" />
 
         <receiver android:name=".StartService">
             <intent-filter>

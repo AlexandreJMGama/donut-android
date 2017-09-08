@@ -1,6 +1,7 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +16,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -55,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }else {
+            Intent it = new Intent(this, RestService.class);
+            stopService(it);
             alertLogin();
         }
     }

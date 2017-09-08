@@ -1,5 +1,7 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -20,12 +23,27 @@ public class InfoActivity extends AppCompatActivity {
 
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
-    RegDB regDB;
+    String accessToken = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
+
+        RegDB regDB = new RegDB(getBaseContext());
+        Cursor cursor = regDB.carregar();
+
+        try {
+            accessToken = cursor.getString(cursor.getColumnIndex(Banco.TOKEN));
+        }catch (Exception e){
+            //Sem dados
+        }
+
+        if (!isServiceRunning(RestService.class) && accessToken != null) {
+            Intent it = new Intent(this, RestService.class);
+            startService(it);
+            Log.i("::CHECK", "Iniciado service");
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -62,10 +80,10 @@ public class InfoActivity extends AppCompatActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-
-        }else if (id == R.id.about){
             Intent it = new Intent(this, RestService.class);
-            startService(it);
+            stopService(it);
+        }else if (id == R.id.about){
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -92,5 +110,15 @@ public class InfoActivity extends AppCompatActivity {
         public int getCount() {
             return mFragments.size();
         }
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

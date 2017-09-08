@@ -126,6 +126,23 @@ class ControlRoom {
         return cursor;
     }
 
+    public int carregarUltimoId(int idRoom){
+        db = bancoRoom.getReadableDatabase();
+        int id = 1;
+        Cursor cursor = db.rawQuery("SELECT "+ bancoRoom.SMS_ID +" FROM "+ bancoRoom.TAB +" WHERE " + bancoRoom.ROOM_ID + " = " + idRoom, null);
+
+        if (cursor != null){
+            try {
+                cursor.moveToLast();
+                id = cursor.getInt(cursor.getColumnIndex(BancoRoom.SMS_ID));
+            }catch (Exception e){
+            }
+        }
+        db.close();
+
+        return id;
+    }
+
     public void delete(){
         db = bancoRoom.getWritableDatabase();
         bancoRoom.onUpgrade(db, 1, 2);
@@ -176,16 +193,12 @@ class ControlEtag {
     public Cursor carregar(int id){
         Cursor cursor;
         db = bancoListRoom.getReadableDatabase();
-        String[] campos = {bancoListRoom.ID, bancoListRoom.eTAG};
         cursor = db.rawQuery("SELECT * FROM "+ bancoListRoom.TAB +" WHERE " + bancoListRoom.ID + " = " + id, null);
 
         if (cursor != null){
             try {
                 cursor.moveToFirst();
-                String f1 = cursor.getString(cursor.getColumnIndex(BancoListRoom.eTAG));
-                Log.i("::CHECK", f1);
             }catch (Exception e){
-
             }
         }
 
