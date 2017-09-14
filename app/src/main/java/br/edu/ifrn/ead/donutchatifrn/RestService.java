@@ -1,6 +1,5 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
-import android.app.ActivityManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +14,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Timer;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
+import br.edu.ifrn.ead.donutchatifrn.Banco.DBListRoom;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlEtag;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlRoom;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
 
 /**
  * Created by Ale on 03/09/2017.
@@ -25,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 public class RestService extends Service {
 
-    RegDB regDB;
+    ControlUserData userData;
     ControlRoom controlRoom;
     ControlEtag controlEtag;
     String accessToken = null;
@@ -46,26 +50,25 @@ public class RestService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("::CHECK", "onStartCommand SERVICE");
-        regDB = new RegDB(getBaseContext());
+        userData = new ControlUserData(getBaseContext());
         controlRoom = new ControlRoom(getApplicationContext());
         controlEtag = new ControlEtag(getApplicationContext());
-        Cursor cursorUser = regDB.carregar();
+        Cursor cursorUser = userData.carregar();
 
         executor = new ScheduledThreadPoolExecutor(1);
 
         try {
-            accessToken = cursorUser.getString(cursorUser.getColumnIndex(Banco.TOKEN));
-            roomList = cursorUser.getString(cursorUser.getColumnIndex(Banco.ROOMLIST));
+            accessToken = cursorUser.getString(cursorUser.getColumnIndex(DBUserData.TOKEN));
+            roomList = cursorUser.getString(cursorUser.getColumnIndex(DBUserData.ROOMLIST));
         } catch (Exception e) {
             //Sem dados
         }
 
         TimeUnit unit = TimeUnit.MINUTES;
         executor.scheduleAtFixedRate(new Worker(), 0, 5, unit);
-        //chama um runnable sem delay a cada 1 minuto
         Log.i("::CHECK", "\nCount exec " + startId);
 
-            return START_STICKY;
+        return START_STICKY;
     }
 
     @Override
@@ -80,8 +83,8 @@ public class RestService extends Service {
         @Override
         public void run() {
 
-            Log.i("::CHECK", "Worker");
-            if (accessToken != null && Conexao().isConnected()) {
+            if (accessToken != null && Conexao()) {
+                Log.i("::CHECK", "Worker");
                 try {
                     JSONArray roomArray = new JSONArray(roomList);
                     for (int i = 0; i < roomArray.length(); i++) {
@@ -94,12 +97,6 @@ public class RestService extends Service {
                 }
             }
         }
-    }
-
-    private NetworkInfo Conexao() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-        return info;
     }
 
     private class restMessage extends AsyncTask<Integer, Void, String> {
@@ -115,7 +112,7 @@ public class RestService extends Service {
 
             //pegar o etag
             try {
-                eTag = cursorEtag.getString(cursorEtag.getColumnIndex(BancoListRoom.eTAG));
+                eTag = cursorEtag.getString(cursorEtag.getColumnIndex(DBListRoom.eTAG));
             }catch (Exception e){
                 //Sem dados
             }
@@ -187,5 +184,11 @@ public class RestService extends Service {
                 e.printStackTrace();
             }
         }
+    }
+
+    private boolean Conexao() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return info.isConnected() && info != null;
     }
 }

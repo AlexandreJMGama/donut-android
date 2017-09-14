@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +16,17 @@ import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.json.JSONObject;
 
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
+import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlEtag;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlRoom;
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class UserMeFragment extends Fragment {
 
-    RegDB regDB;
+    ControlUserData userData;
     private String dados;
     String  name, typeUser, url_pic;
 
@@ -51,12 +55,12 @@ public class UserMeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //deleta todos os dados dos bancos
-                regDB = new RegDB(getContext());
-                regDB.delete();
-                ControlEtag controlEtag = new ControlEtag(getContext());
-                controlEtag.delete();
+                userData = new ControlUserData(getContext());
                 ControlRoom controlRoom = new ControlRoom(getContext());
+                ControlEtag controlEtag = new ControlEtag(getContext());
+                userData.delete();
                 controlRoom.delete();
+                controlEtag.delete();
 
                 //fim do delete
                 Intent intent = new Intent(getContext(), MainActivity.class);
@@ -70,11 +74,11 @@ public class UserMeFragment extends Fragment {
 
     public void orgDados(){
         //Organizando dados
-        regDB = new RegDB(getContext());
-        Cursor cursor = regDB.carregar();
+        userData = new ControlUserData(getContext());
+        Cursor cursor = userData.carregar();
 
         try {
-            dados = cursor.getString(cursor.getColumnIndex(Banco.USERDATA));
+            dados = cursor.getString(cursor.getColumnIndex(DBUserData.USERDATA));
             //Sem dados
             JSONObject jsonData = new JSONObject(dados);
             name = jsonData.getString("name");

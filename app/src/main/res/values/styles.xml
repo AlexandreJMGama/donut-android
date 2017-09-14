@@ -17,17 +17,19 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="TextAppearance.ExpandedTitle"
-        parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
-        <item name="android:textSize">22sp</item>
-    </style>
-
     <style name="UserMeText">
         <item name="android:maxLines">2</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">@android:color/darker_gray</item>
         <item name="android:background">@drawable/text_shadow</item>
         <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="TextChatMe">
+        <item name="android:textSize">18sp</item>
+        <item name="android:gravity">right</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:background">@drawable/item_chat_me</item>
     </style>
 
 </resources>

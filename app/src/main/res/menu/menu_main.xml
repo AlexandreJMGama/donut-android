@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,14 +8,12 @@
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
-        android:icon="@drawable/ic_settings_black_24dp"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/about"
         android:orderInCategory="100"
         android:title="@string/about"
-        android:icon="@drawable/ic_about_black_24dp"
         app:showAsAction="never" />
 
 </menu>

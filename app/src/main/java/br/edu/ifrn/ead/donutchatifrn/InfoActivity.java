@@ -19,6 +19,9 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
+import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
+
 public class InfoActivity extends AppCompatActivity {
 
     SectionsPagerAdapter mSectionsPagerAdapter;
@@ -30,19 +33,19 @@ public class InfoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
 
-        RegDB regDB = new RegDB(getBaseContext());
-        Cursor cursor = regDB.carregar();
+        ControlUserData userData = new ControlUserData(getBaseContext());
+        Cursor cursor = userData.carregar();
 
         try {
-            accessToken = cursor.getString(cursor.getColumnIndex(Banco.TOKEN));
+            accessToken = cursor.getString(cursor.getColumnIndex(DBUserData.TOKEN));
         }catch (Exception e){
             //Sem dados
         }
 
         if (!isServiceRunning(RestService.class) && accessToken != null) {
+            Log.i("::CHECK", "Iniciado service");
             Intent it = new Intent(this, RestService.class);
             startService(it);
-            Log.i("::CHECK", "Iniciado service");
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -80,8 +83,7 @@ public class InfoActivity extends AppCompatActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent it = new Intent(this, RestService.class);
-            stopService(it);
+
         }else if (id == R.id.about){
 
         }

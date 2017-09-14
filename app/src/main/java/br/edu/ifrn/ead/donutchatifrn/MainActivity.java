@@ -1,7 +1,5 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,7 +14,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -27,6 +24,9 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 
 import org.json.JSONObject;
 
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
+import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
+
 public class MainActivity extends AppCompatActivity {
 
     private EditText userInput, passInput;
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private String usuario = null, senha = null, accessToken = null;
     private AlertDialog login, alerta;
     Boolean passVisible = false;
-    RegDB regDB;
+    ControlUserData userData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +42,12 @@ public class MainActivity extends AppCompatActivity {
         Fresco.initialize(this);
         setContentView(R.layout.activity_main);
 
-        regDB = new RegDB(getBaseContext());
-        Cursor cursor = regDB.carregar();
+        userData = new ControlUserData(getBaseContext());
+        Cursor cursor = userData.carregar();
 
         try {
-            usuario = cursor.getString(cursor.getColumnIndex(Banco.USER));
-            accessToken = cursor.getString(cursor.getColumnIndex(Banco.TOKEN));
+            usuario = cursor.getString(cursor.getColumnIndex(DBUserData.USER));
+            accessToken = cursor.getString(cursor.getColumnIndex(DBUserData.TOKEN));
         }catch (Exception e){
             //Sem dados
         }
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 alertText("Verifique seus dados!");
             }else {
                 //Logado
-                regDB.inserir(usuario, result, accessToken);
+                userData.inserir(usuario, result, accessToken);
                 Intent intent = new Intent(getApplicationContext(), IntroActivity.class);
                 startActivity(intent);
                 finish();

@@ -24,9 +24,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.edu.ifrn.ead.donutchatifrn.Adapters.AdapterRooms;
+import br.edu.ifrn.ead.donutchatifrn.Adapters.Room;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
+import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
+
 public class IntroActivity extends AppCompatActivity {
 
-    RegDB regDB;
+    ControlUserData userData;
     TextView txtUser;
     List<Room> rooms;
     ListView listView;
@@ -72,13 +77,13 @@ public class IntroActivity extends AppCompatActivity {
 
     public boolean orgDados(){
         //Organizando dados
-        regDB = new RegDB(getBaseContext());
-        Cursor cursor = regDB.carregar();
+        userData = new ControlUserData(getBaseContext());
+        Cursor cursor = userData.carregar();
 
         try {
-            usuario = cursor.getString(cursor.getColumnIndex(Banco.USER));
-            dados = cursor.getString(cursor.getColumnIndex(Banco.USERDATA));
-            accessToken = cursor.getString(cursor.getColumnIndex(Banco.TOKEN));
+            usuario = cursor.getString(cursor.getColumnIndex(DBUserData.USER));
+            dados = cursor.getString(cursor.getColumnIndex(DBUserData.USERDATA));
+            accessToken = cursor.getString(cursor.getColumnIndex(DBUserData.TOKEN));
             //Sem dados
             JSONObject jsonData = new JSONObject(dados);
             donutID = String.valueOf(jsonData.getInt("id"));
@@ -128,7 +133,7 @@ public class IntroActivity extends AppCompatActivity {
             if (result != null){
                 //get ok
                 try {
-                    regDB.atualizar(null, null, result);
+                    userData.atualizar(null, null, result);
                     getRoomList();
                 } catch (SQLiteException e) {
                     e.printStackTrace();
@@ -142,11 +147,11 @@ public class IntroActivity extends AppCompatActivity {
 
     public boolean getRoomList(){
 
-        regDB = new RegDB(getBaseContext());
-        Cursor cursor = regDB.carregar();
+        userData = new ControlUserData(getBaseContext());
+        Cursor cursor = userData.carregar();
 
         try {
-            roomList = cursor.getString(cursor.getColumnIndex(Banco.ROOMLIST));
+            roomList = cursor.getString(cursor.getColumnIndex(DBUserData.ROOMLIST));
             Log.i("::CHECK", "isEmpty? "+roomList.isEmpty());
             if (roomList.isEmpty()){
                 return false;

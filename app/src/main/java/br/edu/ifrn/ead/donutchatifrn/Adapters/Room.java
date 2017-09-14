@@ -1,4 +1,4 @@
-package br.edu.ifrn.ead.donutchatifrn;
+package br.edu.ifrn.ead.donutchatifrn.Adapters;
 
 /**
  * Created by Ale on 21/08/2017.
@@ -6,11 +6,11 @@ package br.edu.ifrn.ead.donutchatifrn;
 
 public class Room {
 
-    int id;
-    int suapID;
-    int year;
-    int semestre;
-    String title;
+    public int id;
+    public int suapID;
+    public int year;
+    public int semestre;
+    public String title;
 
     public Room(int id, int suapID, int year, int semestre, String title){
         this.id = id;

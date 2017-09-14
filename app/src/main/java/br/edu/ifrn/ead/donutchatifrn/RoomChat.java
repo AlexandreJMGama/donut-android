@@ -1,65 +1,79 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
 import android.content.Intent;
-import android.support.design.widget.AppBarLayout;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
-import net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout;
-
-public class RoomChat extends AppCompatActivity implements View.OnClickListener {
+public class RoomChat extends AppCompatActivity {
 
     int idRoom;
     String titleRoom;
-    AppBarLayout barLayout;
-    CollapsingToolbarLayout toolbarLayout;
-    Toolbar toolbar;
-    boolean expanded = false;
+    EditText textFromSend;
+    Button btnSend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_chat);
 
+        textFromSend = (EditText) findViewById(R.id.edtfromsend);
+        btnSend = (Button) findViewById(R.id.send);
+
         Intent intent = getIntent();
         idRoom = intent.getIntExtra("id", -1);
         titleRoom = intent.getStringExtra("title");
 
-        toolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collap);
-        barLayout = (AppBarLayout) findViewById(R.id.appbarchat);
-        toolbar = (Toolbar) findViewById(R.id.toolbarchat);
-
-        toolbar.setOnClickListener(this);
-        toolbarLayout.setOnClickListener(this);
-
-        toolbar.setTitle(titleRoom);
-        setSupportActionBar(toolbar);
-
         if(getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle(titleRoom);
         }
+
+        btnSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (textFromSend.getText().toString().trim().length() > 0) {
+
+                }
+            }
+        });
     }
 
     @Override
-    public void onClick(View view) {
-        if (expanded){
-            expanded = false;
-            barLayout.setExpanded(expanded);
-        }else {
-            expanded = true;
-            barLayout.setExpanded(expanded);
-        }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_chat, menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        onBackPressed();
-        return true;
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.about_room) {
+
+        }else  if (id == android.R.id.home){
+            onBackPressed();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

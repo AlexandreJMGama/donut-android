@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:fitsSystemWindows="true"
     tools:context="br.edu.ifrn.ead.donutchatifrn.RoomChat">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbarchat"
-        android:fitsSystemWindows="true"
-        android:theme="@style/AppTheme.AppBarOverlay"
+    <ScrollView
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        app:expanded="false" >
-
-        <net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout
-            android:id="@+id/collap"
-            android:theme="@style/AppTheme.AppBarOverlay"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:id="@+id/chatscrollview"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:expandedTitleGravity="bottom"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:expandedTitleTextAppearance="@style/TextAppearance.ExpandedTitle"
-            app:maxLines="3">
+            android:layout_height="match_parent">
+        </RelativeLayout>
+    </ScrollView>
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbarchat"
-                android:layout_height="?attr/actionBarSize"
-                android:layout_width="match_parent"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:layout_collapseMode="pin"/>
+    <LinearLayout
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        </net.opacapp.multilinecollapsingtoolbar.CollapsingToolbarLayout>
+        <EditText
+            android:id="@+id/edtfromsend"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-    </android.support.design.widget.AppBarLayout>
+        <Button
+            android:id="@+id/send"
+            android:text="send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</LinearLayout>

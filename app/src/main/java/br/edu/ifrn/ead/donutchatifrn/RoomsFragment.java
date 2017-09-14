@@ -18,13 +18,18 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.edu.ifrn.ead.donutchatifrn.Adapters.AdapterRooms;
+import br.edu.ifrn.ead.donutchatifrn.Adapters.Room;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
+import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class RoomsFragment extends Fragment {
 
     View view;
-    RegDB regDB;
+    ControlUserData userData;
     String roomList;
     List<Room> rooms;
     ListView listView;
@@ -62,11 +67,11 @@ public class RoomsFragment extends Fragment {
 
     public boolean getRoomList(){
 
-        regDB = new RegDB(getContext());
-        Cursor cursor = regDB.carregar();
+        userData = new ControlUserData(getContext());
+        Cursor cursor = userData.carregar();
 
         try {
-            roomList = cursor.getString(cursor.getColumnIndex(Banco.ROOMLIST));
+            roomList = cursor.getString(cursor.getColumnIndex(DBUserData.ROOMLIST));
             Log.i("::CHECK", "isEmpty? "+roomList.isEmpty());
             if (roomList.isEmpty()){
                 return false;

@@ -1,8 +1,7 @@
-package br.edu.ifrn.ead.donutchatifrn;
+package br.edu.ifrn.ead.donutchatifrn.Adapters;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
+
+import br.edu.ifrn.ead.donutchatifrn.R;
+
 /**
  * Created by Ale on 21/08/2017.
  */
