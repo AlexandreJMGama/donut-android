@@ -71,14 +71,6 @@ public class RestService extends Service {
         return START_STICKY;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        executor.shutdown();
-        stopSelf();
-        Log.i("::CHECK","STOP SERVICE");
-    }
-
     class Worker implements Runnable {
         @Override
         public void run() {
@@ -176,7 +168,7 @@ public class RestService extends Service {
                     int idRoom = jsonObj.getInt("room_id");
                     String data = jsonObj.getString("created_at");
 
-                    if (idMess > id) {
+                    if (idMess > lastId) {
                         controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
                     }//senão a mensagem ja existe e n precisa ser adicionada
                 }

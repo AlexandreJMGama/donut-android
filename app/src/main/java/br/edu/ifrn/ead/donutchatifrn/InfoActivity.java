@@ -26,27 +26,11 @@ public class InfoActivity extends AppCompatActivity {
 
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
-    String accessToken = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
-
-        ControlUserData userData = new ControlUserData(getBaseContext());
-        Cursor cursor = userData.carregar();
-
-        try {
-            accessToken = cursor.getString(cursor.getColumnIndex(DBUserData.TOKEN));
-        }catch (Exception e){
-            //Sem dados
-        }
-
-        if (!isServiceRunning(RestService.class) && accessToken != null) {
-            Log.i("::CHECK", "Iniciado service");
-            Intent it = new Intent(this, RestService.class);
-            startService(it);
-        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -112,15 +96,5 @@ public class InfoActivity extends AppCompatActivity {
         public int getCount() {
             return mFragments.size();
         }
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 }

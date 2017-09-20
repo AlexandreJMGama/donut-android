@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#20b41e</color>
-    <color name="colorPrimaryDark">#297e17</color>
-    <color name="colorAccent">#da251d</color>
+    <!-- COR PADRÃO -->
+    <color name="colorPrimary">#4CAF50</color>
+    <color name="colorPrimaryDark">#388E3C</color>
+    <color name="colorAccent">#FF5252</color>
+    <!-- SEGUNDA OPÇÃO -->
+    <color name="colorPrimary2">#16ff2e</color>
+    <color name="colorPrimaryDark2">#23ba32</color>
+    <color name="colorAccent2">#ff4242</color>
+    <color name="colorAlt1">#eee82c</color>
+    <color name="colorAlt2">#246eb9</color>
+    <!-- TERCEIRA OPÇÃO -->
 </resources>

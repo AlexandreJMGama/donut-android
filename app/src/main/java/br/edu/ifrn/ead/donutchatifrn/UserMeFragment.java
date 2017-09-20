@@ -79,7 +79,6 @@ public class UserMeFragment extends Fragment {
 
         try {
             dados = cursor.getString(cursor.getColumnIndex(DBUserData.USERDATA));
-            //Sem dados
             JSONObject jsonData = new JSONObject(dados);
             name = jsonData.getString("name");
             typeUser = jsonData.getString("category");

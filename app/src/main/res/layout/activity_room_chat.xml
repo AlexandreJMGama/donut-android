@@ -7,17 +7,14 @@
     android:orientation="vertical"
     tools:context="br.edu.ifrn.ead.donutchatifrn.RoomChat">
 
-    <ScrollView
+    <ListView
+        android:id="@+id/lstMsg"
         android:layout_weight="1"
+        android:listSelector="@android:color/transparent"
+        android:transcriptMode="alwaysScroll"
+        android:divider="@null"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <RelativeLayout
-            android:id="@+id/chatscrollview"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        </RelativeLayout>
-    </ScrollView>
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:layout_gravity="bottom"

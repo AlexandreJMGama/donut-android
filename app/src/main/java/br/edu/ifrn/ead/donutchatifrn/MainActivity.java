@@ -52,13 +52,11 @@ public class MainActivity extends AppCompatActivity {
             //Sem dados
         }
 
-        if (usuario != null && accessToken != null){
+        if (usuario != null && accessToken != null) {
             Intent intent = new Intent(this, InfoActivity.class);
             startActivity(intent);
             finish();
         }else {
-            Intent it = new Intent(this, RestService.class);
-            stopService(it);
             alertLogin();
         }
     }
@@ -115,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         login.show();
     }
 
-    private void makeLogin(){
+    private void makeLogin() {
         usuario = userInput.getText().toString().trim();
         senha = passInput.getText().toString();
 
@@ -161,9 +159,9 @@ public class MainActivity extends AppCompatActivity {
                         .get("https://donutchat.herokuapp.com/api/users/me")
                         .header("Authorization", "Token "+accessToken);
 
-                if (accessToken == null){
+                if (accessToken == null) {
                     return null;
-                }else{
+                }else {
                     return jsonMe.body();
                 }
 

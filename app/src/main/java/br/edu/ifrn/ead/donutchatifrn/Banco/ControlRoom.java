@@ -6,6 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import br.edu.ifrn.ead.donutchatifrn.Adapters.Chat;
+
 /**
  * Created by Ale on 14/09/2017.
  */
@@ -39,18 +44,26 @@ public class ControlRoom {
         }
     }
 
-    public Cursor carregar(){
+    public List carregar(int idRoom){
         Cursor cursor;
         db = DBRoomMesseges.getReadableDatabase();
-        String[] campos = {DBRoomMesseges.SMS_ID, DBRoomMesseges.MENSAGEM, DBRoomMesseges.USER_ID, DBRoomMesseges.ROOM_ID, DBRoomMesseges.SMS_TIME};
-        cursor = db.query(DBRoomMesseges.TAB, campos, null, null, null, null, null);
+        cursor = db.rawQuery("SELECT * FROM "+ DBRoomMesseges.TAB +" WHERE " + DBRoomMesseges.ROOM_ID + " = " + idRoom, null);
 
-        if (cursor != null){
-            cursor.moveToNext();
+        List<Chat> lista = new ArrayList();
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+            while (cursor.isAfterLast() == false) {
+                String content = cursor.getString(cursor.getColumnIndex(DBRoomMesseges.MENSAGEM));
+                int userId = cursor.getInt(cursor.getColumnIndex(DBRoomMesseges.USER_ID));
+                lista.add(new Chat(content, userId));
+                cursor.moveToNext();
+            }
         }
+
         db.close();
 
-        return cursor;
+        return lista;
     }
 
     public int carregarUltimoId(int idRoom){
@@ -75,4 +88,6 @@ public class ControlRoom {
         DBRoomMesseges.onUpgrade(db, 1, 2);
         db.close();
     }
+
+
 }

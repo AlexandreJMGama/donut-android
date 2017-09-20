@@ -25,11 +25,4 @@
         <item name="android:padding">10dp</item>
     </style>
 
-    <style name="TextChatMe">
-        <item name="android:textSize">18sp</item>
-        <item name="android:gravity">right</item>
-        <item name="android:padding">10dp</item>
-        <item name="android:background">@drawable/item_chat_me</item>
-    </style>
-
 </resources>
