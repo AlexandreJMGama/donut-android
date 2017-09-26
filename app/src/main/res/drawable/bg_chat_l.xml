@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- This is the line -->
-    <item>
-        <shape>
-            <solid android:color="#aaaa" />
-            <corners android:radius="10dp" />
-        </shape>
-    </item>
-    <!-- This is the main color -->
-    <item android:left="2dp" android:bottom="4dp" android:right="2dp">
-        <shape>
-            <solid android:color="#ffff9800" />
-            <corners android:radius="10dp" />
-        </shape>
-    </item>
-</layer-list>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <solid android:color="#eddd" />
+    <corners android:radius="10dp" />
+
+</shape>

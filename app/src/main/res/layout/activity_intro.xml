@@ -6,13 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="br.edu.ifrn.ead.donutchatifrn.IntroActivity">
-
-    <ImageView
-        android:src="@drawable/background5"
-        android:scaleType="centerCrop"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
+    
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"

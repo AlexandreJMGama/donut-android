@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +34,7 @@ import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
 
 public class RoomChat extends AppCompatActivity {
 
-    int idRoom, idUser;
+    int idRoom, myIdUser;
     String titleRoom, accessToken = null;
     EditText textFromSend;
     Button btnSend;
@@ -41,7 +42,9 @@ public class RoomChat extends AppCompatActivity {
     List<Chat> chat;
     AdapterChat adapterChat;
     ControlUserData userData;
+    ControlEtag controlEtag;
     ControlRoom controlRoom;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class RoomChat extends AppCompatActivity {
 
         orgDados();
 
+        progressBar = (ProgressBar) findViewById(R.id.progressList);
         textFromSend = (EditText) findViewById(R.id.edtfromsend);
         listView = (ListView) findViewById(R.id.lstMsg);
         btnSend = (Button) findViewById(R.id.send);
@@ -63,6 +67,7 @@ public class RoomChat extends AppCompatActivity {
 
         adapterChat = new AdapterChat(getBaseContext(), chat);
         listView.setAdapter(adapterChat);
+        listView.setSelection(adapterChat.getCount() - 1);
 
         if(getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -74,12 +79,15 @@ public class RoomChat extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (textFromSend.getText().toString().trim().length() > 0) {
-                    chat.add(new Chat(textFromSend.getText().toString().trim(), idUser));
+                    chat.add(new Chat(textFromSend.getText().toString().trim(), myIdUser));
                     adapterChat.notifyDataSetChanged();
+                    new postMessege().execute(textFromSend.getText().toString().trim());
                     textFromSend.setText("");
                 }
             }
         });
+
+        new getMesseges().execute();
     }
 
     @Override
@@ -106,15 +114,152 @@ public class RoomChat extends AppCompatActivity {
     public void orgDados() {
         //Organizando dados
         userData = new ControlUserData(getBaseContext());
+        controlEtag = new ControlEtag(getBaseContext());
+        controlRoom = new ControlRoom(getBaseContext());
+        userData = new ControlUserData(getBaseContext());
         Cursor cursor = userData.carregar();
 
         try {
             String dados = cursor.getString(cursor.getColumnIndex(DBUserData.USERDATA));
             JSONObject jsonData = new JSONObject(dados);
-            idUser = jsonData.getInt("id");
+            myIdUser = jsonData.getInt("id");
             accessToken = jsonData.getString("token");
             Log.i("::CHECK", accessToken);
         } catch (Exception e) {
+        }
+    }
+
+    private class getMesseges extends AsyncTask<Void, Void, String>{
+
+        String eTag = "", neweTag;
+        Boolean ok = false;
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(ProgressBar.VISIBLE);
+        }
+
+        @Override
+        protected String doInBackground(Void... obj) {
+
+            Cursor cursorEtag = controlEtag.carregar(idRoom);
+
+            try {
+                eTag = cursorEtag.getString(cursorEtag.getColumnIndex(DBListRoom.eTAG));
+            }catch (Exception e){
+                //Sem dados
+            }
+
+            HttpRequest httpData = HttpRequest
+                    .get("https://donutchat.herokuapp.com/api/rooms/"+idRoom+"/messages")
+                    .header("Authorization", "Token "+accessToken)
+                    .header("If-None-Match", eTag);
+
+            ok = httpData.ok();
+            neweTag = httpData.eTag();
+            return httpData.body();
+
+        }
+
+        @Override
+        protected void onPostExecute(String json) {
+            if (ok && eTag.length() > 0){
+                //Atualizando
+                controlEtag.atualizar(idRoom, neweTag);
+                inserirMensagem(json, idRoom, false);
+            }else if (ok && eTag == ""){
+                //Inserindo
+                controlEtag.inserir(idRoom, neweTag);
+                inserirMensagem(json, idRoom, true);
+            }
+            progressBar.setVisibility(ProgressBar.GONE);
+        }
+    }
+
+    public void inserirMensagem (String json, int id, boolean isNew){
+        if (isNew){
+            try {
+                JSONArray roomArray = new JSONArray(json);
+                for (int i = 0; i < roomArray.length(); i++) {
+                    JSONObject jsonObj = roomArray.getJSONObject(i);
+                    int idMess = jsonObj.getInt("id");
+                    String mensagem = jsonObj.getString("content");
+                    int idUser = jsonObj.getInt("user_id");
+                    int idRoom = jsonObj.getInt("room_id");
+                    String data = jsonObj.getString("created_at");
+                    controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
+                    chat.add(new Chat(mensagem, idUser));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }else {
+            //verificar(carregar) ate q mensagem foi adicionada e so adicionar as novas
+            int lastId = controlRoom.carregarUltimoId(id);
+            try {
+                JSONArray roomArray = new JSONArray(json);
+                for (int i = 0; i < roomArray.length(); i++) {
+                    JSONObject jsonObj = roomArray.getJSONObject(i);
+                    int idMess = jsonObj.getInt("id");
+                    String mensagem = jsonObj.getString("content");
+                    int idUser = jsonObj.getInt("user_id");
+                    int idRoom = jsonObj.getInt("room_id");
+                    String data = jsonObj.getString("created_at");
+
+                    if (idMess > lastId) {
+                        controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
+                        chat.add(new Chat(mensagem, idUser));
+                    }//senão a mensagem ja existe e n precisa ser adicionada
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        adapterChat.notifyDataSetChanged();
+    }
+
+    private class postMessege extends AsyncTask<String, Void , String>{
+        String idSala = String.valueOf(idRoom);
+
+        @Override
+        protected String doInBackground(String... strings) {
+            String mensagem = strings[0];
+
+            try {
+                JSONObject userValues = new JSONObject();
+                JSONObject jsonSend = new JSONObject();
+                userValues.put("content", mensagem);
+                userValues.put("room_id", idSala);
+                jsonSend.put("message", userValues);
+                String jsonStr = jsonSend.toString();
+
+                HttpRequest httpData = HttpRequest
+                        .post("https://donutchat.herokuapp.com/api/messages/create")
+                        .header("Authorization", "Token "+accessToken)
+                        .header("Content-Type", "application/json")
+                        .send(jsonStr);
+
+                return httpData.body();
+            }catch (Exception e){
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.i("::CHECK", result);
+            try{
+                JSONObject jsonObj = new JSONObject(result);
+                int idMess = jsonObj.getInt("id");
+                String mensagem = jsonObj.getString("content");
+                int idUser = jsonObj.getInt("user_id");
+                int idRoom = jsonObj.getInt("room_id");
+                String data = jsonObj.getString("created_at");
+                controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
+            }catch (Exception e){
+
+            }
+            new getMesseges().execute();
         }
     }
 }

@@ -5,9 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#2033B5E5"
     tools:context="br.edu.ifrn.ead.donutchatifrn.RoomChat">
 
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/progressList"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <ListView
+        android:layout_marginTop="5dp"
         android:id="@+id/lstMsg"
         android:layout_weight="1"
         android:listSelector="@android:color/transparent"
@@ -19,20 +27,33 @@
     <LinearLayout
         android:layout_gravity="bottom"
         android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="4dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <EditText
             android:id="@+id/edtfromsend"
+            android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+            android:background="@drawable/bg_input"
+            android:textSize="18sp"
+            android:hint="Digite aqui..."
+            android:padding="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:maxHeight="126dp"
+            android:scrollbars="vertical"
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/send"
-            android:text="send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:background="@mipmap/ic_send"
+            android:layout_gravity="bottom"
+            android:layout_marginRight="3dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
     </LinearLayout>
 
 </LinearLayout>

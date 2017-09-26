@@ -13,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -28,6 +29,7 @@ import br.edu.ifrn.ead.donutchatifrn.R;
 public class AdapterChat extends BaseAdapter {
 
     int myIdUser;
+    String userName;
     private Context context;
     private List<Chat> messages;
 
@@ -55,7 +57,7 @@ public class AdapterChat extends BaseAdapter {
         Chat chat = messages.get(i);
         View returnView;
 
-        orgDados();
+        orgDados(chat.userId);
 
         Log.i("::CHECK", "List id:"+chat.userId);
         Log.i("::CHECK", "My id:"+myIdUser);
@@ -67,12 +69,15 @@ public class AdapterChat extends BaseAdapter {
         }
 
         TextView message = (TextView) returnView.findViewById(R.id.txtMsg);
+        TextView userView = (TextView) returnView.findViewById(R.id.txtUser);
+
         message.setText(chat.content);
+        userView.setText(userName);
 
         return returnView;
     }
 
-    public void orgDados(){
+    public void orgDados(int userID){
         //Organizando dados
         ControlUserData userData = new ControlUserData(context);
         Cursor cursor = userData.carregar();
@@ -82,6 +87,24 @@ public class AdapterChat extends BaseAdapter {
             JSONObject jsonData = new JSONObject(dados);
             myIdUser = jsonData.getInt("id");
         }catch (Exception e){
+        }
+
+        try {
+            String json = cursor.getString(cursor.getColumnIndex(DBUserData.USERLIST));
+
+            JSONArray roomArray = new JSONArray(json);
+            for (int i = 0; i < roomArray.length(); i++) {
+                JSONObject jsonObj = roomArray.getJSONObject(i);
+                int jsonID = jsonObj.getInt("id");
+                String jsonName = jsonObj.getString("name");
+                Log.i("::CHECK", "JSON USER "+ jsonName);
+                if (userID == jsonID){
+                    userName = jsonName;
+                    return;
+                }
+            }
+        }catch (Exception e){
+
         }
     }
 }

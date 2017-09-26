@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fresco.initialize(this);
+        TypefaceUtil.overrideFont(getApplicationContext(), "SERIF", "Roboto-Regular.ttf"); // font from assets: "assets/Roboto-Regular.ttf
         setContentView(R.layout.activity_main);
 
         userData = new ControlUserData(getBaseContext());
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (usuario != null && accessToken != null) {
-            Intent intent = new Intent(this, InfoActivity.class);
+            Intent intent = new Intent(this, IntroActivity.class);
             startActivity(intent);
             finish();
         }else {

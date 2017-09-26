@@ -16,10 +16,13 @@
     <EditText
         android:id="@+id/username"
         android:inputType="number"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:maxLines="1"
+        android:hint="Matricula"
+        android:paddingTop="20dp"
         android:layout_margin="4dp"
-        android:hint="Matricula" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -28,12 +31,14 @@
 
         <EditText
             android:id="@+id/password"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
+            android:inputType="textPassword"
+            android:textSize="18sp"
             android:hint="Senha"
-            android:inputType="textPassword" />
+            android:maxLines="1"
+            android:layout_weight="1"
+            android:layout_margin="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <Button
             android:id="@+id/passView"

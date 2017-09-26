@@ -1,9 +1,12 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,17 +29,22 @@ import java.util.List;
 
 import br.edu.ifrn.ead.donutchatifrn.Adapters.AdapterRooms;
 import br.edu.ifrn.ead.donutchatifrn.Adapters.Room;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlEtag;
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlRoom;
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
+import br.edu.ifrn.ead.donutchatifrn.Banco.DBListRoom;
 import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
 
 public class IntroActivity extends AppCompatActivity {
 
     ControlUserData userData;
+    ControlEtag controlEtag;
+    ControlRoom controlRoom;
     TextView txtUser;
     List<Room> rooms;
     ListView listView;
     AdapterRooms adapterRooms;
-    private String usuario, accessToken, dados, roomList;
+    private String usuario, accessToken = null, dados, roomList = null, verifyRooms = null;
     String donutID, name, fullname, email, typeUser, url_pic;
     FloatingActionButton btnFloat;
 
@@ -48,22 +56,34 @@ public class IntroActivity extends AppCompatActivity {
         SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.my_image_view);
         txtUser = (TextView) findViewById(R.id.txtname);
         btnFloat = (FloatingActionButton) findViewById(R.id.fab);
+        listView = (ListView) findViewById(R.id.lvIntro);
 
+        rooms = new ArrayList<Room>();
         orgDados();
+
+        if (verifyRooms.trim().length() > 0){
+            Intent intent = new Intent(getApplicationContext(), InfoActivity.class);
+            startActivity(intent);
+            finish();
+
+        }else if (usuario != null && accessToken != null){
+
+            if (getRoomList()){
+                //
+            }else {
+                if (Conexao()){
+                    new getRooms().execute();
+                }else {
+                    Toast.makeText(this, "Verifique sua conexão!", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
 
         txtUser.setText("Olá "+typeUser+"!\nSeja bem vindo\n"+name);
         Uri uri = Uri.parse("https://suap.ifrn.edu.br"+url_pic);
         draweeView.setImageURI(uri);
-        listView = (ListView) findViewById(R.id.lvIntro);
-        rooms = new ArrayList<Room>();
 
-        if (usuario != null && accessToken != null){
-            if (getRoomList()){
-                //
-            }else {
-                new getRooms().execute();
-            }
-        }
+
 
         btnFloat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,12 +98,16 @@ public class IntroActivity extends AppCompatActivity {
     public boolean orgDados(){
         //Organizando dados
         userData = new ControlUserData(getBaseContext());
+        controlEtag = new ControlEtag(getBaseContext());
+        controlRoom = new ControlRoom(getBaseContext());
         Cursor cursor = userData.carregar();
 
+        usuario = cursor.getString(cursor.getColumnIndex(DBUserData.USER));
+        dados = cursor.getString(cursor.getColumnIndex(DBUserData.USERDATA));
+        accessToken = cursor.getString(cursor.getColumnIndex(DBUserData.TOKEN));
+        verifyRooms = cursor.getString(cursor.getColumnIndex(DBUserData.ROOMLIST));
+
         try {
-            usuario = cursor.getString(cursor.getColumnIndex(DBUserData.USER));
-            dados = cursor.getString(cursor.getColumnIndex(DBUserData.USERDATA));
-            accessToken = cursor.getString(cursor.getColumnIndex(DBUserData.TOKEN));
             //Sem dados
             JSONObject jsonData = new JSONObject(dados);
             donutID = String.valueOf(jsonData.getInt("id"));
@@ -107,6 +131,7 @@ public class IntroActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute(){
             progressDialog = new ProgressDialog(IntroActivity.this);
+            progressDialog.setTitle("Carregando salas!");
             progressDialog.show();
         }
 
@@ -147,11 +172,11 @@ public class IntroActivity extends AppCompatActivity {
 
     public boolean getRoomList(){
 
-        userData = new ControlUserData(getBaseContext());
         Cursor cursor = userData.carregar();
+        roomList = cursor.getString(cursor.getColumnIndex(DBUserData.ROOMLIST));
 
         try {
-            roomList = cursor.getString(cursor.getColumnIndex(DBUserData.ROOMLIST));
+
             Log.i("::CHECK", "isEmpty? "+roomList.isEmpty());
             if (roomList.isEmpty()){
                 return false;
@@ -179,8 +204,146 @@ public class IntroActivity extends AppCompatActivity {
                 adapterRooms = new AdapterRooms(getApplicationContext(), rooms);
             }
             listView.setAdapter(adapterRooms);
+            new getUsers().execute();
+            allmesseges();
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private class getUsers extends AsyncTask<Void, Void, String>{
+
+        @Override
+        protected String doInBackground(Void... voids) {
+
+            HttpRequest jsonUsers = HttpRequest
+                    .get("https://donutchat.herokuapp.com/api/users")
+                    .header("Authorization", "Token "+accessToken);
+
+            if (jsonUsers.ok())
+                return jsonUsers.body();
+            else
+                return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            if (result != null){
+                //get ok
+                try {
+                    userData.atualizar(null, result, null);
+                } catch (SQLiteException e) {
+                    e.printStackTrace();
+                }
+
+            }else {
+                Toast.makeText(getApplicationContext(), "Erro", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void allmesseges(){
+        try {
+            JSONArray roomArray = new JSONArray(roomList);
+            for (int i = 0; i < roomArray.length(); i++) {
+                JSONObject jsonObj = roomArray.getJSONObject(i);
+                int id = jsonObj.getInt("id");
+                new getMesseges().execute(id);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class getMesseges extends AsyncTask<Integer, Void, String>{
+
+        String eTag = "", neweTag;
+        Boolean ok = false;
+        int id;
+
+        @Override
+        protected String doInBackground(Integer... idRoom) {
+            id = idRoom[0];
+            Cursor cursorEtag = controlEtag.carregar(id);
+
+            try {
+                eTag = cursorEtag.getString(cursorEtag.getColumnIndex(DBListRoom.eTAG));
+            }catch (Exception e){
+                //Sem dados
+            }
+
+            try {
+                HttpRequest httpData = HttpRequest
+                        .get("https://donutchat.herokuapp.com/api/rooms/"+id+"/messages")
+                        .header("Authorization", "Token "+accessToken)
+                        .header("If-None-Match", eTag);
+
+                ok = httpData.ok();
+                neweTag = httpData.eTag();
+                return httpData.body();
+
+            }catch (Exception e){
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String json) {
+            if (ok && eTag.length() > 0){
+                //Atualizando
+                controlEtag.atualizar(id, neweTag);
+                inserirMensagem(json, id, false);
+            }else if (ok && eTag == ""){
+                //Inserindo
+                controlEtag.inserir(id, neweTag);
+                inserirMensagem(json, id, true);
+            }
+        }
+    }
+
+    public void inserirMensagem (String json, int id, boolean isNew){
+        if (isNew){
+            try {
+                JSONArray roomArray = new JSONArray(json);
+                for (int i = 0; i < roomArray.length(); i++) {
+                    JSONObject jsonObj = roomArray.getJSONObject(i);
+                    int idMess = jsonObj.getInt("id");
+                    String mensagem = jsonObj.getString("content");
+                    int idUser = jsonObj.getInt("user_id");
+                    int idRoom = jsonObj.getInt("room_id");
+                    String data = jsonObj.getString("created_at");
+                    controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }else {
+            //verificar(carregar) ate q mensagem foi adicionada e so adicionar as novas
+            int lastId = controlRoom.carregarUltimoId(id);
+            try {
+                JSONArray roomArray = new JSONArray(json);
+                for (int i = 0; i < roomArray.length(); i++) {
+                    JSONObject jsonObj = roomArray.getJSONObject(i);
+                    int idMess = jsonObj.getInt("id");
+                    String mensagem = jsonObj.getString("content");
+                    int idUser = jsonObj.getInt("user_id");
+                    int idRoom = jsonObj.getInt("room_id");
+                    String data = jsonObj.getString("created_at");
+
+                    if (idMess > lastId) {
+                        controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
+                    }//senão a mensagem ja existe e n precisa ser adicionada
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private boolean Conexao() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return info.isConnected() && info != null;
     }
 }

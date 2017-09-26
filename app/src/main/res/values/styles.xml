@@ -6,9 +6,12 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:typeface">serif</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
+        <item name="android:typeface">serif</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
@@ -20,9 +23,9 @@
     <style name="UserMeText">
         <item name="android:maxLines">2</item>
         <item name="android:gravity">center</item>
-        <item name="android:textColor">@android:color/darker_gray</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorPrimary</item>
         <item name="android:background">@drawable/text_shadow</item>
-        <item name="android:padding">10dp</item>
     </style>
 
 </resources>
