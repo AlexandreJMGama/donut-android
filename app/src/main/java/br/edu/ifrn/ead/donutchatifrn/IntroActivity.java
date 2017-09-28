@@ -71,7 +71,7 @@ public class IntroActivity extends AppCompatActivity {
             if (getRoomList()){
                 //
             }else {
-                if (Conexao()){
+                if (Conexao() != null && Conexao().isConnected()){
                     new getRooms().execute();
                 }else {
                     Toast.makeText(this, "Verifique sua conexão!", Toast.LENGTH_LONG).show();
@@ -341,9 +341,9 @@ public class IntroActivity extends AppCompatActivity {
         }
     }
 
-    private boolean Conexao() {
+    private NetworkInfo Conexao() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
-        return info.isConnected() && info != null;
+        return info;
     }
 }

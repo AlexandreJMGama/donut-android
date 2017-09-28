@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,15 +80,21 @@ public class RoomChat extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (textFromSend.getText().toString().trim().length() > 0) {
-                    chat.add(new Chat(textFromSend.getText().toString().trim(), myIdUser));
-                    adapterChat.notifyDataSetChanged();
-                    new postMessege().execute(textFromSend.getText().toString().trim());
-                    textFromSend.setText("");
+                    if(info() != null && info().isConnected()) {
+                        chat.add(new Chat(textFromSend.getText().toString().trim(), myIdUser));
+                        adapterChat.notifyDataSetChanged();
+                        new postMessege().execute(textFromSend.getText().toString().trim());
+                        textFromSend.setText("");
+                    }else {
+                        Toast.makeText(RoomChat.this, "Verifique sua conexão!", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
 
-        new getMesseges().execute();
+        if(info() != null && info().isConnected()) {
+            new getMesseges().execute();
+        }
     }
 
     @Override
@@ -261,5 +268,12 @@ public class RoomChat extends AppCompatActivity {
             }
             new getMesseges().execute();
         }
+    }
+
+    private NetworkInfo info() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        //info.isConnected() && info != null;
+        return info;
     }
 }

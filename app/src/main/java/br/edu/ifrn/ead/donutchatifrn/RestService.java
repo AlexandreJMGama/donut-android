@@ -181,6 +181,6 @@ public class RestService extends Service {
     private boolean Conexao() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
-        return info.isConnected() && info != null;
+        return info != null && info.isConnected();
     }
 }
