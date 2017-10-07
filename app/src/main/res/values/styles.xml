@@ -28,4 +28,56 @@
         <item name="android:background">@drawable/text_shadow</item>
     </style>
 
+    <style name="UserLeft">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/bg_user_left</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:layout_marginRight">3px</item>
+        <item name="android:layout_marginTop">3px</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:maxWidth">300dp</item>
+    </style>
+
+    <style name="MessLeft">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">#F333</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:maxWidth">300dp</item>
+    </style>
+
+    <style name="UserRight">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/bg_user_right</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingRight">15dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginTop">3px</item>
+        <item name="android:layout_marginLeft">3px</item>
+        <item name="android:maxWidth">300dp</item>
+    </style>
+
+    <style name="MessRight">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingRight">15dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:layout_marginBottom">2dp</item>
+        <item name="android:maxWidth">300dp</item>
+    </style>
+
 </resources>

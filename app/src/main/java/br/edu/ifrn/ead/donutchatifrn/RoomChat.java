@@ -45,7 +45,6 @@ public class RoomChat extends AppCompatActivity {
     ControlUserData userData;
     ControlEtag controlEtag;
     ControlRoom controlRoom;
-    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +57,6 @@ public class RoomChat extends AppCompatActivity {
 
         orgDados();
 
-        progressBar = (ProgressBar) findViewById(R.id.progressList);
         textFromSend = (EditText) findViewById(R.id.edtfromsend);
         listView = (ListView) findViewById(R.id.lstMsg);
         btnSend = (Button) findViewById(R.id.send);
@@ -142,11 +140,6 @@ public class RoomChat extends AppCompatActivity {
         Boolean ok = false;
 
         @Override
-        protected void onPreExecute() {
-            progressBar.setVisibility(ProgressBar.VISIBLE);
-        }
-
-        @Override
         protected String doInBackground(Void... obj) {
 
             Cursor cursorEtag = controlEtag.carregar(idRoom);
@@ -179,7 +172,6 @@ public class RoomChat extends AppCompatActivity {
                 controlEtag.inserir(idRoom, neweTag);
                 inserirMensagem(json, idRoom, true);
             }
-            progressBar.setVisibility(ProgressBar.GONE);
         }
     }
 
