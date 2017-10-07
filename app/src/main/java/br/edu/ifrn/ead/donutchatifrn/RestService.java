@@ -75,7 +75,7 @@ public class RestService extends Service {
         @Override
         public void run() {
 
-            if (accessToken != null && Conexao()) {
+            if (accessToken != null && Conexao() != null && Conexao().isConnected()) {
                 Log.i("::CHECK", "Worker");
                 try {
                     JSONArray roomArray = new JSONArray(roomList);
@@ -178,9 +178,10 @@ public class RestService extends Service {
         }
     }
 
-    private boolean Conexao() {
+    private NetworkInfo Conexao() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
-        return info != null && info.isConnected();
+//      info != null && info.isConnected();
+        return info;
     }
 }

@@ -47,7 +47,7 @@ public class ControlRoom {
     public List carregar(int idRoom){
         Cursor cursor;
         db = DBRoomMesseges.getReadableDatabase();
-        cursor = db.rawQuery("SELECT * FROM "+ DBRoomMesseges.TAB +" WHERE " + DBRoomMesseges.ROOM_ID + " = " + idRoom, null);
+        cursor = db.rawQuery("SELECT * FROM "+ DBRoomMesseges.TAB +" WHERE "+ DBRoomMesseges.ROOM_ID +" = "+ idRoom, null);
 
         List<Chat> lista = new ArrayList();
 

@@ -18,12 +18,23 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.hosopy.actioncable.ActionCable;
+import com.hosopy.actioncable.ActionCableException;
+import com.hosopy.actioncable.Channel;
+import com.hosopy.actioncable.Consumer;
+import com.hosopy.actioncable.Subscription;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import br.edu.ifrn.ead.donutchatifrn.Adapters.AdapterChat;
 import br.edu.ifrn.ead.donutchatifrn.Adapters.Chat;
@@ -36,7 +47,7 @@ import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
 public class RoomChat extends AppCompatActivity {
 
     int idRoom, myIdUser;
-    String titleRoom, accessToken = null;
+    String titleRoom, strIdRoom, accessToken = null;
     EditText textFromSend;
     Button btnSend;
     ListView listView;
@@ -45,6 +56,10 @@ public class RoomChat extends AppCompatActivity {
     ControlUserData userData;
     ControlEtag controlEtag;
     ControlRoom controlRoom;
+    URI uri = null;
+    Channel chatChannel;
+    Subscription subscription;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +68,11 @@ public class RoomChat extends AppCompatActivity {
 
         Intent intent = getIntent();
         idRoom = intent.getIntExtra("id", -1);
+        strIdRoom = String.valueOf(idRoom);
         titleRoom = intent.getStringExtra("title");
 
         orgDados();
+        setupConection();
 
         textFromSend = (EditText) findViewById(R.id.edtfromsend);
         listView = (ListView) findViewById(R.id.lstMsg);
@@ -77,11 +94,19 @@ public class RoomChat extends AppCompatActivity {
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (textFromSend.getText().toString().trim().length() > 0) {
+                String textSend = textFromSend.getText().toString().trim();
+                if (textSend.length() > 0) {
                     if(info() != null && info().isConnected()) {
-                        chat.add(new Chat(textFromSend.getText().toString().trim(), myIdUser));
+
+                        JsonObject userValues = new JsonObject();
+                        userValues.addProperty("content", textSend);
+                        userValues.addProperty("room_id", strIdRoom);
+
+                        subscription.perform("send_message", userValues);
+                        Log.i("::CHECK", "ENVIANDO ...");
+
+                        chat.add(new Chat(textSend, myIdUser));
                         adapterChat.notifyDataSetChanged();
-                        new postMessege().execute(textFromSend.getText().toString().trim());
                         textFromSend.setText("");
                     }else {
                         Toast.makeText(RoomChat.this, "Verifique sua conexão!", Toast.LENGTH_SHORT).show();
@@ -217,55 +242,90 @@ public class RoomChat extends AppCompatActivity {
         adapterChat.notifyDataSetChanged();
     }
 
-    private class postMessege extends AsyncTask<String, Void , String>{
-        String idSala = String.valueOf(idRoom);
-
-        @Override
-        protected String doInBackground(String... strings) {
-            String mensagem = strings[0];
-
-            try {
-                JSONObject userValues = new JSONObject();
-                JSONObject jsonSend = new JSONObject();
-                userValues.put("content", mensagem);
-                userValues.put("room_id", idSala);
-                jsonSend.put("message", userValues);
-                String jsonStr = jsonSend.toString();
-
-                HttpRequest httpData = HttpRequest
-                        .post("https://donutchat.herokuapp.com/api/messages/create")
-                        .header("Authorization", "Token "+accessToken)
-                        .header("Content-Type", "application/json")
-                        .send(jsonStr);
-
-                return httpData.body();
-            }catch (Exception e){
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            Log.i("::CHECK", result);
-            try{
-                JSONObject jsonObj = new JSONObject(result);
-                int idMess = jsonObj.getInt("id");
-                String mensagem = jsonObj.getString("content");
-                int idUser = jsonObj.getInt("user_id");
-                int idRoom = jsonObj.getInt("room_id");
-                String data = jsonObj.getString("created_at");
-                controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
-            }catch (Exception e){
-
-            }
-            new getMesseges().execute();
-        }
-    }
-
     private NetworkInfo info() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
         //info.isConnected() && info != null;
         return info;
+    }
+
+    private void setupConection(){
+
+        try {
+            uri = new URI("https://donutchat.herokuapp.com/cable");
+            Log.i("::CHECK", uri.toString());
+        }catch (Exception e){
+        }
+
+        Consumer.Options options = new Consumer.Options();
+        options.reconnection = true;
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("token", accessToken);
+        options.headers = headers;
+
+        Consumer consumer = ActionCable.createConsumer(uri, options);
+
+        chatChannel = new Channel("ChatRoomsChannel");
+        chatChannel.addParam("room_id", strIdRoom);
+        subscription = consumer.getSubscriptions().create(chatChannel);
+
+        subscription
+                .onConnected(new Subscription.ConnectedCallback() {
+                    @Override
+                    public void call() {
+                        Log.i("::CHECK", "onConnected");
+                    }
+                }).onRejected(new Subscription.RejectedCallback() {
+            @Override
+            public void call() {
+                Log.i("::CHECK", "RejectedCallback");
+                // Called when the subscription is rejected by the server
+            }
+        }).onReceived(new Subscription.ReceivedCallback() {
+            @Override
+            public void call(JsonElement data) {
+                Log.i("::CHECK", "onReceived");
+                boolean atualizar = false;
+                String result = data.toString();
+                try {
+                    JSONObject jsonObj = new JSONObject(result);
+                    int idMess = jsonObj.getInt("id");
+                    String mensagem = jsonObj.getString("content");
+                    int idUser = jsonObj.getInt("user_id");
+                    int idRoom = jsonObj.getInt("room_id");
+                    String sendData = jsonObj.getString("created_at");
+                    controlRoom.inserir(idMess, mensagem, idUser, idRoom, sendData);
+                    if (idUser == myIdUser){
+                        atualizar = false;
+                    }else {
+                        atualizar = true;
+                    }
+
+                }catch (Exception e){
+                }
+
+                chat = controlRoom.carregar(idRoom);
+                if (atualizar) {
+                    adapterChat.notifyDataSetChanged();
+                }
+            }
+        }).onDisconnected(new Subscription.DisconnectedCallback() {
+            @Override
+            public void call() {
+                Log.i("::CHECK", "onDisconnected");
+
+                // Called when the subscription has been closed
+            }
+        }).onFailed(new Subscription.FailedCallback() {
+            @Override
+            public void call(ActionCableException e) {
+                Log.i("::CHECK", "onFailed");
+                Log.i("::CHECK", e.getMessage());
+                // Called when the subscription encounters any error
+            }
+        });
+
+        consumer.connect();
     }
 }
