@@ -117,8 +117,18 @@ public class MainActivity extends AppCompatActivity {
     private void makeLogin() {
         usuario = userInput.getText().toString().trim();
         senha = passInput.getText().toString();
+        boolean ok = true;
 
-        if (Conexao() != null && Conexao().isConnected()){
+        if (usuario.equals("")){
+            userInput.setError("Matricula");
+            ok = false;
+        }
+        if (senha.equals("")){
+            passInput.setError("Senha");
+            ok = false;
+        }
+
+        if (Conexao() != null && Conexao().isConnected() && ok){
             new AutenticacaoTask().execute();
         }else {
             Toast.makeText(getApplicationContext(), "Sem conexão!", Toast.LENGTH_LONG).show();
@@ -191,8 +201,6 @@ public class MainActivity extends AppCompatActivity {
     private NetworkInfo Conexao() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
-//            NetworkInfo wifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-//            NetworkInfo mb = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
         return info;
     }
 

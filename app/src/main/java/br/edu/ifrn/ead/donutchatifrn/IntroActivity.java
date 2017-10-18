@@ -29,16 +29,13 @@ import java.util.List;
 
 import br.edu.ifrn.ead.donutchatifrn.Adapters.AdapterRooms;
 import br.edu.ifrn.ead.donutchatifrn.Adapters.Room;
-import br.edu.ifrn.ead.donutchatifrn.Banco.ControlEtag;
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlRoom;
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
-import br.edu.ifrn.ead.donutchatifrn.Banco.DBListRoom;
 import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
 
 public class IntroActivity extends AppCompatActivity {
 
     ControlUserData userData;
-    ControlEtag controlEtag;
     ControlRoom controlRoom;
     TextView txtUser;
     List<Room> rooms;
@@ -98,7 +95,6 @@ public class IntroActivity extends AppCompatActivity {
     public boolean orgDados(){
         //Organizando dados
         userData = new ControlUserData(getBaseContext());
-        controlEtag = new ControlEtag(getBaseContext());
         controlRoom = new ControlRoom(getBaseContext());
         Cursor cursor = userData.carregar();
 
@@ -258,29 +254,19 @@ public class IntroActivity extends AppCompatActivity {
 
     private class getMesseges extends AsyncTask<Integer, Void, String>{
 
-        String eTag = "", neweTag;
         Boolean ok = false;
         int id;
 
         @Override
         protected String doInBackground(Integer... idRoom) {
             id = idRoom[0];
-            Cursor cursorEtag = controlEtag.carregar(id);
-
-            try {
-                eTag = cursorEtag.getString(cursorEtag.getColumnIndex(DBListRoom.eTAG));
-            }catch (Exception e){
-                //Sem dados
-            }
 
             try {
                 HttpRequest httpData = HttpRequest
                         .get("https://donutchat.herokuapp.com/api/rooms/"+id+"/messages")
-                        .header("Authorization", "Token "+accessToken)
-                        .header("If-None-Match", eTag);
+                        .header("Authorization", "Token "+accessToken);
 
                 ok = httpData.ok();
-                neweTag = httpData.eTag();
                 return httpData.body();
 
             }catch (Exception e){
@@ -290,14 +276,8 @@ public class IntroActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String json) {
-            if (ok && eTag.length() > 0){
-                //Atualizando
-                controlEtag.atualizar(id, neweTag);
+            if (ok){
                 inserirMensagem(json, id, false);
-            }else if (ok && eTag == ""){
-                //Inserindo
-                controlEtag.inserir(id, neweTag);
-                inserirMensagem(json, id, true);
             }
         }
     }

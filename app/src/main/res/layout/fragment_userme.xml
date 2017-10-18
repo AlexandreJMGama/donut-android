@@ -62,7 +62,7 @@
                         android:layout_height="wrap_content" />
 
                     <TextView
-                        android:text="IFRN- CAMPUS APODI"
+                        android:text="IFRN - CAMPUS APODI"
                         android:textSize="13sp"
                         android:shadowRadius="1"
                         android:shadowColor="#004A00"

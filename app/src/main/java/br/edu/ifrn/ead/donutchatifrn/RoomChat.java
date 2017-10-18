@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.gson.JsonElement;
@@ -31,17 +30,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import br.edu.ifrn.ead.donutchatifrn.Adapters.AdapterChat;
 import br.edu.ifrn.ead.donutchatifrn.Adapters.Chat;
-import br.edu.ifrn.ead.donutchatifrn.Banco.ControlEtag;
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlRoom;
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
-import br.edu.ifrn.ead.donutchatifrn.Banco.DBListRoom;
 import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
 
 public class RoomChat extends AppCompatActivity {
@@ -54,7 +50,6 @@ public class RoomChat extends AppCompatActivity {
     List<Chat> chat;
     AdapterChat adapterChat;
     ControlUserData userData;
-    ControlEtag controlEtag;
     ControlRoom controlRoom;
     URI uri = null;
     Channel chatChannel;
@@ -71,19 +66,13 @@ public class RoomChat extends AppCompatActivity {
         strIdRoom = String.valueOf(idRoom);
         titleRoom = intent.getStringExtra("title");
 
-        orgDados();
-        setupConection();
-
         textFromSend = (EditText) findViewById(R.id.edtfromsend);
         listView = (ListView) findViewById(R.id.lstMsg);
         btnSend = (Button) findViewById(R.id.send);
 
-        controlRoom = new ControlRoom(getBaseContext());
-        chat = controlRoom.carregar(idRoom);
-
-        adapterChat = new AdapterChat(getBaseContext(), chat);
-        listView.setAdapter(adapterChat);
-        listView.setSelection(adapterChat.getCount() - 1);
+        orgDados();
+        setupConection();
+        mudarLista();
 
         if(getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -103,10 +92,15 @@ public class RoomChat extends AppCompatActivity {
                         userValues.addProperty("room_id", strIdRoom);
 
                         subscription.perform("send_message", userValues);
-                        Log.i("::CHECK", "ENVIANDO ...");
 
                         chat.add(new Chat(textSend, myIdUser));
-                        adapterChat.notifyDataSetChanged();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapterChat.notifyDataSetChanged();
+                            }
+                        });
+                        listView.setSelection(adapterChat.getCount() - 1);
                         textFromSend.setText("");
                     }else {
                         Toast.makeText(RoomChat.this, "Verifique sua conexão!", Toast.LENGTH_SHORT).show();
@@ -142,11 +136,8 @@ public class RoomChat extends AppCompatActivity {
     }
 
     public void orgDados() {
-        //Organizando dados
-        userData = new ControlUserData(getBaseContext());
-        controlEtag = new ControlEtag(getBaseContext());
-        controlRoom = new ControlRoom(getBaseContext());
-        userData = new ControlUserData(getBaseContext());
+        userData = new ControlUserData(this);
+        controlRoom = new ControlRoom(this);
         Cursor cursor = userData.carregar();
 
         try {
@@ -161,85 +152,45 @@ public class RoomChat extends AppCompatActivity {
 
     private class getMesseges extends AsyncTask<Void, Void, String>{
 
-        String eTag = "", neweTag;
         Boolean ok = false;
 
         @Override
         protected String doInBackground(Void... obj) {
 
-            Cursor cursorEtag = controlEtag.carregar(idRoom);
+        HttpRequest httpData = HttpRequest
+                .get("https://donutchat.herokuapp.com/api/rooms/"+idRoom+"/messages")
+                .header("Authorization", "Token "+accessToken);
 
-            try {
-                eTag = cursorEtag.getString(cursorEtag.getColumnIndex(DBListRoom.eTAG));
-            }catch (Exception e){
-                //Sem dados
-            }
-
-            HttpRequest httpData = HttpRequest
-                    .get("https://donutchat.herokuapp.com/api/rooms/"+idRoom+"/messages")
-                    .header("Authorization", "Token "+accessToken)
-                    .header("If-None-Match", eTag);
-
-            ok = httpData.ok();
-            neweTag = httpData.eTag();
-            return httpData.body();
+        ok = httpData.ok();
+        return httpData.body();
 
         }
 
         @Override
         protected void onPostExecute(String json) {
-            if (ok && eTag.length() > 0){
-                //Atualizando
-                controlEtag.atualizar(idRoom, neweTag);
-                inserirMensagem(json, idRoom, false);
-            }else if (ok && eTag == ""){
-                //Inserindo
-                controlEtag.inserir(idRoom, neweTag);
-                inserirMensagem(json, idRoom, true);
+            if (ok) {
+                inserirMensagem(json);
             }
         }
     }
 
-    public void inserirMensagem (String json, int id, boolean isNew){
-        if (isNew){
-            try {
-                JSONArray roomArray = new JSONArray(json);
-                for (int i = 0; i < roomArray.length(); i++) {
-                    JSONObject jsonObj = roomArray.getJSONObject(i);
-                    int idMess = jsonObj.getInt("id");
-                    String mensagem = jsonObj.getString("content");
-                    int idUser = jsonObj.getInt("user_id");
-                    int idRoom = jsonObj.getInt("room_id");
-                    String data = jsonObj.getString("created_at");
-                    controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
-                    chat.add(new Chat(mensagem, idUser));
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+    public void inserirMensagem (String json){
+        try {
+            JSONArray roomArray = new JSONArray(json);
+            for (int i = 0; i < roomArray.length(); i++) {
+                JSONObject jsonObj = roomArray.getJSONObject(i);
+                int idMess = jsonObj.getInt("id");
+                String mensagem = jsonObj.getString("content");
+                int idUser = jsonObj.getInt("user_id");
+                int idRoom = jsonObj.getInt("room_id");
+                String data = jsonObj.getString("created_at");
+                controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
+                chat.add(new Chat(mensagem, idUser));
             }
-        }else {
-            //verificar(carregar) ate q mensagem foi adicionada e so adicionar as novas
-            int lastId = controlRoom.carregarUltimoId(id);
-            try {
-                JSONArray roomArray = new JSONArray(json);
-                for (int i = 0; i < roomArray.length(); i++) {
-                    JSONObject jsonObj = roomArray.getJSONObject(i);
-                    int idMess = jsonObj.getInt("id");
-                    String mensagem = jsonObj.getString("content");
-                    int idUser = jsonObj.getInt("user_id");
-                    int idRoom = jsonObj.getInt("room_id");
-                    String data = jsonObj.getString("created_at");
-
-                    if (idMess > lastId) {
-                        controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
-                        chat.add(new Chat(mensagem, idUser));
-                    }//senão a mensagem ja existe e n precisa ser adicionada
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        adapterChat.notifyDataSetChanged();
+
     }
 
     private NetworkInfo info() {
@@ -280,52 +231,56 @@ public class RoomChat extends AppCompatActivity {
             @Override
             public void call() {
                 Log.i("::CHECK", "RejectedCallback");
-                // Called when the subscription is rejected by the server
             }
         }).onReceived(new Subscription.ReceivedCallback() {
             @Override
             public void call(JsonElement data) {
                 Log.i("::CHECK", "onReceived");
-                boolean atualizar = false;
-                String result = data.toString();
-                try {
-                    JSONObject jsonObj = new JSONObject(result);
-                    int idMess = jsonObj.getInt("id");
-                    String mensagem = jsonObj.getString("content");
-                    int idUser = jsonObj.getInt("user_id");
-                    int idRoom = jsonObj.getInt("room_id");
-                    String sendData = jsonObj.getString("created_at");
-                    controlRoom.inserir(idMess, mensagem, idUser, idRoom, sendData);
-                    if (idUser == myIdUser){
-                        atualizar = false;
-                    }else {
-                        atualizar = true;
-                    }
-
-                }catch (Exception e){
-                }
-
-                chat = controlRoom.carregar(idRoom);
-                if (atualizar) {
-                    adapterChat.notifyDataSetChanged();
-                }
+                novaMensagem(data.toString());
             }
         }).onDisconnected(new Subscription.DisconnectedCallback() {
             @Override
             public void call() {
                 Log.i("::CHECK", "onDisconnected");
-
-                // Called when the subscription has been closed
             }
         }).onFailed(new Subscription.FailedCallback() {
             @Override
             public void call(ActionCableException e) {
                 Log.i("::CHECK", "onFailed");
                 Log.i("::CHECK", e.getMessage());
-                // Called when the subscription encounters any error
             }
         });
 
         consumer.connect();
+    }
+
+    public void novaMensagem(String result){
+        try {
+            JSONObject jsonObj = new JSONObject(result);
+            int idMess = jsonObj.getInt("id");
+            String mensagem = jsonObj.getString("content");
+            int idUser = jsonObj.getInt("user_id");
+            int idRoom = jsonObj.getInt("room_id");
+            String sendData = jsonObj.getString("created_at");
+            controlRoom.inserir(idMess, mensagem, idUser, idRoom, sendData);
+            mudarLista();
+        }catch (Exception e){
+        }
+    }
+
+    public void mudarLista(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                chat = controlRoom.carregar(idRoom);
+                if (adapterChat == null){
+                    adapterChat = new AdapterChat(getBaseContext(), chat);
+                    listView.setAdapter(adapterChat);
+                }else {
+                    adapterChat.notifyDataSetChanged();
+                }
+                listView.setSelection(adapterChat.getCount() - 1);
+            }
+        });
     }
 }

@@ -1,9 +1,5 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
-import android.app.ActivityManager;
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -12,15 +8,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
-import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
 
 public class InfoActivity extends AppCompatActivity {
 
@@ -39,7 +31,7 @@ public class InfoActivity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         //setar os tabs aqui
         tabLayout.addTab(tabLayout.newTab().setText("Salas"));
-        tabLayout.addTab(tabLayout.newTab().setText("Usuario"));
+        tabLayout.addTab(tabLayout.newTab().setText("Usuário"));
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         //setar os fragments aqui

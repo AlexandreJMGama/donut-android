@@ -18,7 +18,6 @@ import org.json.JSONObject;
 
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
 import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
-import br.edu.ifrn.ead.donutchatifrn.Banco.ControlEtag;
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlRoom;
 
 /**
@@ -58,12 +57,9 @@ public class UserMeFragment extends Fragment {
                 //deleta todos os dados dos bancos
                 userData = new ControlUserData(getContext());
                 ControlRoom controlRoom = new ControlRoom(getContext());
-                ControlEtag controlEtag = new ControlEtag(getContext());
                 userData.delete();
                 controlRoom.delete();
-                controlEtag.delete();
 
-                //fim do delete
                 Intent intent = new Intent(getContext(), MainActivity.class);
                 startActivity(intent);
                 System.exit(0);
