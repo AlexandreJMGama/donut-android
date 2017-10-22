@@ -55,7 +55,6 @@ public class RoomChat extends AppCompatActivity {
     Channel chatChannel;
     Subscription subscription;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,15 +91,6 @@ public class RoomChat extends AppCompatActivity {
                         userValues.addProperty("room_id", strIdRoom);
 
                         subscription.perform("send_message", userValues);
-
-                        chat.add(new Chat(textSend, myIdUser));
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                adapterChat.notifyDataSetChanged();
-                            }
-                        });
-                        listView.setSelection(adapterChat.getCount() - 1);
                         textFromSend.setText("");
                     }else {
                         Toast.makeText(RoomChat.this, "Verifique sua conexão!", Toast.LENGTH_SHORT).show();
@@ -170,6 +160,7 @@ public class RoomChat extends AppCompatActivity {
         protected void onPostExecute(String json) {
             if (ok) {
                 inserirMensagem(json);
+                Log.i("::CHECK", "onPost");
             }
         }
     }
@@ -184,9 +175,14 @@ public class RoomChat extends AppCompatActivity {
                 int idUser = jsonObj.getInt("user_id");
                 int idRoom = jsonObj.getInt("room_id");
                 String data = jsonObj.getString("created_at");
-                controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
-                chat.add(new Chat(mensagem, idUser));
+                Log.i("::CHECK", "inserir");
+                if(!controlRoom.hasMessege(idRoom, idMess)) {
+                    controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
+                    chat.add(new Chat(mensagem, idUser));
+                    Log.i("::CHECK", "chat add");
+                }
             }
+            mudarLista();
         } catch (JSONException e) {
             e.printStackTrace();
         }

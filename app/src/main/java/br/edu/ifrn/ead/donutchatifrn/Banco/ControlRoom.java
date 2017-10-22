@@ -8,6 +8,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import br.edu.ifrn.ead.donutchatifrn.Adapters.Chat;
 
@@ -38,16 +39,15 @@ public class ControlRoom {
         db.close();
 
         if (resultado == -1){
-            Log.i("::CHECK", "Erro no BD");
+            Log.i("::CHECK", "Erro no BD - inserir");
         }else {
             Log.i("::CHECK", "Ok no BD");
         }
     }
 
     public List carregar(int idRoom){
-        Cursor cursor;
         db = DBRoomMesseges.getReadableDatabase();
-        cursor = db.rawQuery("SELECT * FROM "+ DBRoomMesseges.TAB +" WHERE "+ DBRoomMesseges.ROOM_ID +" = "+ idRoom, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM "+ DBRoomMesseges.TAB +" WHERE "+ DBRoomMesseges.ROOM_ID +" = "+ idRoom, null);
 
         List<Chat> lista = new ArrayList();
 
@@ -66,21 +66,25 @@ public class ControlRoom {
         return lista;
     }
 
-    public int carregarUltimoId(int idRoom){
+    public boolean hasMessege(int idRoom, int idMess){
         db = DBRoomMesseges.getReadableDatabase();
-        int id = 1;
-        Cursor cursor = db.rawQuery("SELECT "+ DBRoomMesseges.SMS_ID +" FROM "+ DBRoomMesseges.TAB +" WHERE " + DBRoomMesseges.ROOM_ID + " = " + idRoom, null);
+        boolean has = false;
+        Cursor cursor = db.rawQuery("SELECT * FROM "+ DBRoomMesseges.TAB +" WHERE " + DBRoomMesseges.ROOM_ID + " = ?"  +" AND "+ DBRoomMesseges.SMS_ID + " = ?", new String[]{String.valueOf(idRoom), String.valueOf(idMess)});
 
         if (cursor != null){
             try {
-                cursor.moveToLast();
-                id = cursor.getInt(cursor.getColumnIndex(DBRoomMesseges.SMS_ID));
+                cursor.moveToFirst();
+                //Log nessesario para verificação, se n tiver o item da erro e has n fica true
+                int txt = cursor.getInt(cursor.getColumnIndex(DBRoomMesseges.ROOM_ID));
+                Random r = new Random();
+                Log.i("::CHECK", "true-"+txt*r.nextInt());
+                has = true;
             }catch (Exception e){
             }
         }
         db.close();
 
-        return id;
+        return has;
     }
 
     public void delete(){

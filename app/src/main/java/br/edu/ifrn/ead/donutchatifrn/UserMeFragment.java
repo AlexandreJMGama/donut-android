@@ -39,7 +39,6 @@ public class UserMeFragment extends Fragment {
         // Inflate the layout for this fragment
 
         View view = inflater.inflate(R.layout.fragment_userme, container, false);
-        Fresco.initialize(getContext());
 
         SimpleDraweeView draweeView = (SimpleDraweeView) view.findViewById(R.id.sdvImage);
         TextView txtUser = (TextView) view.findViewById(R.id.tvname);

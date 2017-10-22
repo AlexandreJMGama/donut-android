@@ -86,25 +86,8 @@ public class AdapterChat extends BaseAdapter {
             String dados = cursor.getString(cursor.getColumnIndex(DBUserData.USERDATA));
             JSONObject jsonData = new JSONObject(dados);
             myIdUser = jsonData.getInt("id");
+            userName = userData.currentUser(userID);
         }catch (Exception e){
-        }
-
-        try {
-            String json = cursor.getString(cursor.getColumnIndex(DBUserData.USERLIST));
-
-            JSONArray roomArray = new JSONArray(json);
-            for (int i = 0; i < roomArray.length(); i++) {
-                JSONObject jsonObj = roomArray.getJSONObject(i);
-                int jsonID = jsonObj.getInt("id");
-                String jsonName = jsonObj.getString("name");
-                Log.i("::CHECK", "JSON USER "+ jsonName);
-                if (userID == jsonID){
-                    userName = jsonName;
-                    return;
-                }
-            }
-        }catch (Exception e){
-
         }
     }
 }

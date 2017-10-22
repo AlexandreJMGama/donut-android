@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.edu.ifrn.ead.donutchatifrn.Adapters.AdapterRooms;
+import br.edu.ifrn.ead.donutchatifrn.Adapters.Chat;
 import br.edu.ifrn.ead.donutchatifrn.Adapters.Room;
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlRoom;
 import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
@@ -277,47 +278,27 @@ public class IntroActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String json) {
             if (ok){
-                inserirMensagem(json, id, false);
+                inserirMensagem(json);
             }
         }
     }
 
-    public void inserirMensagem (String json, int id, boolean isNew){
-        if (isNew){
-            try {
-                JSONArray roomArray = new JSONArray(json);
-                for (int i = 0; i < roomArray.length(); i++) {
-                    JSONObject jsonObj = roomArray.getJSONObject(i);
-                    int idMess = jsonObj.getInt("id");
-                    String mensagem = jsonObj.getString("content");
-                    int idUser = jsonObj.getInt("user_id");
-                    int idRoom = jsonObj.getInt("room_id");
-                    String data = jsonObj.getString("created_at");
+    public void inserirMensagem (String json){
+        try {
+            JSONArray roomArray = new JSONArray(json);
+            for (int i = 0; i < roomArray.length(); i++) {
+                JSONObject jsonObj = roomArray.getJSONObject(i);
+                int idMess = jsonObj.getInt("id");
+                String mensagem = jsonObj.getString("content");
+                int idUser = jsonObj.getInt("user_id");
+                int idRoom = jsonObj.getInt("room_id");
+                String data = jsonObj.getString("created_at");
+                if(!controlRoom.hasMessege(idRoom, idMess)) {
                     controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
-        }else {
-            //verificar(carregar) ate q mensagem foi adicionada e so adicionar as novas
-            int lastId = controlRoom.carregarUltimoId(id);
-            try {
-                JSONArray roomArray = new JSONArray(json);
-                for (int i = 0; i < roomArray.length(); i++) {
-                    JSONObject jsonObj = roomArray.getJSONObject(i);
-                    int idMess = jsonObj.getInt("id");
-                    String mensagem = jsonObj.getString("content");
-                    int idUser = jsonObj.getInt("user_id");
-                    int idRoom = jsonObj.getInt("room_id");
-                    String data = jsonObj.getString("created_at");
-
-                    if (idMess > lastId) {
-                        controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
-                    }//senão a mensagem ja existe e n precisa ser adicionada
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 

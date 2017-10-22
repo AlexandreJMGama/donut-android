@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
  * Created by Ale on 22/08/2017.
  */
@@ -80,5 +83,27 @@ public class ControlUserData {
         db = meuDBUserData.getWritableDatabase();
         meuDBUserData.onUpgrade(db, 1, 2);
         db.close();
+    }
+
+    public String currentUser(int idUser){
+        Cursor cursor = carregar();
+        String userName = "";
+        try {
+            String json = cursor.getString(cursor.getColumnIndex(DBUserData.USERLIST));
+
+            JSONArray roomArray = new JSONArray(json);
+            for (int i = 0; i < roomArray.length(); i++) {
+                JSONObject jsonObj = roomArray.getJSONObject(i);
+                int jsonID = jsonObj.getInt("id");
+                String jsonName = jsonObj.getString("name");
+                if (idUser == jsonID){
+                    userName = jsonName;
+                    break;
+                }
+            }
+        }catch (Exception e){
+
+        }
+        return userName;
     }
 }
