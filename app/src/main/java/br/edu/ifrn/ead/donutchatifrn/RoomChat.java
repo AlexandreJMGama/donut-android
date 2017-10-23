@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -54,6 +55,8 @@ public class RoomChat extends AppCompatActivity {
     URI uri = null;
     Channel chatChannel;
     Subscription subscription;
+    boolean isConnected = false;
+    ImageView statusDraw;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +71,7 @@ public class RoomChat extends AppCompatActivity {
         textFromSend = (EditText) findViewById(R.id.edtfromsend);
         listView = (ListView) findViewById(R.id.lstMsg);
         btnSend = (Button) findViewById(R.id.send);
+        statusDraw = (ImageView) findViewById(R.id.statusdraw);
 
         orgDados();
         setupConection();
@@ -84,7 +88,7 @@ public class RoomChat extends AppCompatActivity {
             public void onClick(View view) {
                 String textSend = textFromSend.getText().toString().trim();
                 if (textSend.length() > 0) {
-                    if(info() != null && info().isConnected()) {
+                    if(info() != null && info().isConnected() && isConnected) {
 
                         JsonObject userValues = new JsonObject();
                         userValues.addProperty("content", textSend);
@@ -175,11 +179,10 @@ public class RoomChat extends AppCompatActivity {
                 int idUser = jsonObj.getInt("user_id");
                 int idRoom = jsonObj.getInt("room_id");
                 String data = jsonObj.getString("created_at");
-                Log.i("::CHECK", "inserir");
                 if(!controlRoom.hasMessege(idRoom, idMess)) {
+                    Log.i("::CHECK", "inserir AND chat add");
                     controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
                     chat.add(new Chat(mensagem, idUser));
-                    Log.i("::CHECK", "chat add");
                 }
             }
             mudarLista();
@@ -218,47 +221,56 @@ public class RoomChat extends AppCompatActivity {
         subscription = consumer.getSubscriptions().create(chatChannel);
 
         subscription
-                .onConnected(new Subscription.ConnectedCallback() {
-                    @Override
-                    public void call() {
-                        Log.i("::CHECK", "onConnected");
-                    }
-                }).onRejected(new Subscription.RejectedCallback() {
-            @Override
-            public void call() {
-                Log.i("::CHECK", "RejectedCallback");
-            }
-        }).onReceived(new Subscription.ReceivedCallback() {
-            @Override
-            public void call(JsonElement data) {
-                Log.i("::CHECK", "onReceived");
-                novaMensagem(data.toString());
-            }
-        }).onDisconnected(new Subscription.DisconnectedCallback() {
-            @Override
-            public void call() {
-                Log.i("::CHECK", "onDisconnected");
-            }
-        }).onFailed(new Subscription.FailedCallback() {
-            @Override
-            public void call(ActionCableException e) {
-                Log.i("::CHECK", "onFailed");
-                Log.i("::CHECK", e.getMessage());
-            }
-        });
+            .onConnected(new Subscription.ConnectedCallback() {
+                @Override
+                public void call() {
+                    Log.i("::CHECK", "onConnected");
+                    altStatus(0);
+                }
+            }).onRejected(new Subscription.RejectedCallback() {
+                @Override
+                public void call() {
+                    Log.i("::CHECK", "RejectedCallback");
+                    altStatus(3);
+                }
+            }).onReceived(new Subscription.ReceivedCallback() {
+                @Override
+                public void call(JsonElement data) {
+                    Log.i("::CHECK", "onReceived");
+                    Log.i("::CHECK", data.toString());
+                    novaMensagem(data.toString());
+                    altStatus(4);
+                }
+            }).onDisconnected(new Subscription.DisconnectedCallback() {
+                @Override
+                public void call() {
+                    Log.i("::CHECK", "onDisconnected");
+                    altStatus(1);
+                }
+            }).onFailed(new Subscription.FailedCallback() {
+                @Override
+                public void call(ActionCableException e) {
+                    Log.i("::CHECK", "onFailed");
+                    Log.i("::CHECK", e.getMessage());
+                    altStatus(2);
+                }
+            });
 
         consumer.connect();
     }
 
     public void novaMensagem(String result){
         try {
-            JSONObject jsonObj = new JSONObject(result);
+            JSONObject jsonAll = new JSONObject(result);
+            String allMessage = jsonAll.getString("message");
+            JSONObject jsonObj = new JSONObject(allMessage);
             int idMess = jsonObj.getInt("id");
             String mensagem = jsonObj.getString("content");
             int idUser = jsonObj.getInt("user_id");
             int idRoom = jsonObj.getInt("room_id");
             String sendData = jsonObj.getString("created_at");
             controlRoom.inserir(idMess, mensagem, idUser, idRoom, sendData);
+            chat.add(new Chat(mensagem, idUser));
             mudarLista();
         }catch (Exception e){
         }
@@ -268,14 +280,45 @@ public class RoomChat extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                chat = controlRoom.carregar(idRoom);
                 if (adapterChat == null){
+                    chat = controlRoom.carregar(idRoom);
                     adapterChat = new AdapterChat(getBaseContext(), chat);
                     listView.setAdapter(adapterChat);
+                    Log.i("::CHECK", "ADAPT NULL");
                 }else {
                     adapterChat.notifyDataSetChanged();
+                    Log.i("::CHECK", "ADAPT notify");
                 }
                 listView.setSelection(adapterChat.getCount() - 1);
+                Log.i("::CHECK", "LIST SELECT");
+            }
+        });
+    }
+
+    public void altStatus(final int i){
+        isConnected = false;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                switch (i) {
+                    case 0:
+                        isConnected = true;
+                        statusDraw.setImageDrawable(getResources().getDrawable(R.drawable.status_on));
+                        break;
+                    case 1:
+                        statusDraw.setImageDrawable(getResources().getDrawable(R.drawable.status_off));
+                        break;
+                    case 2:
+                        statusDraw.setImageDrawable(getResources().getDrawable(R.drawable.failed_animation));
+                        break;
+                    case 3:
+                        statusDraw.setImageDrawable(getResources().getDrawable(R.drawable.status_rejected));
+                        break;
+                    case 4:
+                        isConnected = true;
+                        statusDraw.setImageDrawable(getResources().getDrawable(R.drawable.received_animation));
+                        break;
+                }
             }
         });
     }

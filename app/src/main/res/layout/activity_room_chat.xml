@@ -18,13 +18,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <ListView
-        android:id="@+id/lstMsg"
-        android:layout_weight="1"
-        android:listSelector="@android:color/transparent"
-        android:divider="@null"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <ImageView
+            android:id="@+id/statusdraw"
+            android:src="@drawable/status_off"
+            android:layout_width="match_parent"
+            android:layout_height="8dp" />
+
+        <ListView
+            android:id="@+id/lstMsg"
+            android:layout_weight="1"
+            android:listSelector="@android:color/transparent"
+            android:divider="@null"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <LinearLayout
             android:layout_gravity="bottom"
