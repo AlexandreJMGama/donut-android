@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -58,10 +59,8 @@ public class InfoActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-
-        }else if (id == R.id.about){
-
+        if (id == R.id.about){
+            alertAbout();
         }
 
         return super.onOptionsItemSelected(item);
@@ -88,5 +87,15 @@ public class InfoActivity extends AppCompatActivity {
         public int getCount() {
             return mFragments.size();
         }
+    }
+
+    public void alertAbout() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("DonutChat")
+                .setMessage("DonutChat - IFRN\nBy: Alexandre Jackson")
+                .setCancelable(true);
+        AlertDialog alerta = builder.create();
+        alerta.show();
     }
 }

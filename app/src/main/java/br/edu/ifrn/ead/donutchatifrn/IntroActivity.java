@@ -202,7 +202,6 @@ public class IntroActivity extends AppCompatActivity {
             }
             listView.setAdapter(adapterRooms);
             new getUsers().execute();
-            allmesseges();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -237,68 +236,6 @@ public class IntroActivity extends AppCompatActivity {
             }else {
                 Toast.makeText(getApplicationContext(), "Erro", Toast.LENGTH_SHORT).show();
             }
-        }
-    }
-
-    private void allmesseges(){
-        try {
-            JSONArray roomArray = new JSONArray(roomList);
-            for (int i = 0; i < roomArray.length(); i++) {
-                JSONObject jsonObj = roomArray.getJSONObject(i);
-                int id = jsonObj.getInt("id");
-                new getMesseges().execute(id);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private class getMesseges extends AsyncTask<Integer, Void, String>{
-
-        Boolean ok = false;
-        int id;
-
-        @Override
-        protected String doInBackground(Integer... idRoom) {
-            id = idRoom[0];
-
-            try {
-                HttpRequest httpData = HttpRequest
-                        .get("https://donutchat.herokuapp.com/api/rooms/"+id+"/messages")
-                        .header("Authorization", "Token "+accessToken);
-
-                ok = httpData.ok();
-                return httpData.body();
-
-            }catch (Exception e){
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String json) {
-            if (ok){
-                inserirMensagem(json);
-            }
-        }
-    }
-
-    public void inserirMensagem (String json){
-        try {
-            JSONArray roomArray = new JSONArray(json);
-            for (int i = 0; i < roomArray.length(); i++) {
-                JSONObject jsonObj = roomArray.getJSONObject(i);
-                int idMess = jsonObj.getInt("id");
-                String mensagem = jsonObj.getString("content");
-                int idUser = jsonObj.getInt("user_id");
-                int idRoom = jsonObj.getInt("room_id");
-                String data = jsonObj.getString("created_at");
-                if(!controlRoom.hasMessege(idRoom, idMess)) {
-                    controlRoom.inserir(idMess, mensagem, idUser, idRoom, data);
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 

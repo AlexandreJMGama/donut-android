@@ -109,20 +109,11 @@ public class RoomChat extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        getMenuInflater().inflate(R.menu.menu_chat, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
 
-        if (id == R.id.about_room) {
-
-        } else if (id == android.R.id.home) {
+        if (id == android.R.id.home) {
             onBackPressed();
         }
 

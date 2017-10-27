@@ -36,6 +36,7 @@
         <activity
             android:name=".RoomChat"
             android:screenOrientation="portrait"
+            android:label="Sala"
             android:theme="@style/AppTheme"></activity>
 
     </application>

@@ -2,22 +2,19 @@ package br.edu.ifrn.ead.donutchatifrn;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -29,10 +26,9 @@ import br.edu.ifrn.ead.donutchatifrn.Banco.DBUserData;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText userInput, passInput;
-    private Button passwordView;
-    private String usuario = null, senha = null, accessToken = null;
-    private AlertDialog login, alerta;
+    EditText userInput, passInput;
+    ImageButton btnLogin, passwordView;
+    String usuario = null, senha = null, accessToken = null;
     Boolean passVisible = false;
     ControlUserData userData;
 
@@ -57,46 +53,23 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, IntroActivity.class);
             startActivity(intent);
             finish();
-        }else {
-            alertLogin();
         }
-    }
 
-    private void alertLogin(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        final View layout = View.inflate(this, R.layout.login_layout, null);
-
-        builder.setView(layout)
-                // Add action buttons
-                .setPositiveButton(R.string.login, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        hideKeyboard();
-                        makeLogin();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        finish();
-                    }
-                });
-
-        userInput = (EditText) layout.findViewById(R.id.username);
-        passInput = (EditText) layout.findViewById(R.id.password);
-        passwordView = (Button) layout.findViewById(R.id.passView);
+        userInput = (EditText) findViewById(R.id.username);
+        passInput = (EditText) findViewById(R.id.password);
+        passwordView = (ImageButton) findViewById(R.id.passView);
+        btnLogin = (ImageButton) findViewById(R.id.logar);
 
         passwordView.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
             @Override
             public void onClick(View view) {
                 if (passVisible) {
-                    passwordView.setBackground(getResources().getDrawable(R.drawable.ic_eye_black_24dp));
+                    passwordView.setImageResource(R.drawable.ic_visibility_off_black_24dp);
                     passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     passInput.setSelection(passInput.length());
                     passVisible = false;
                 }else {
-                    passwordView.setBackground(getResources().getDrawable(R.drawable.ic_eye_green_24dp));
+                    passwordView.setImageResource(R.drawable.ic_eye_black_24dp);
                     passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
                     passInput.setSelection(passInput.length());
                     passVisible = true;
@@ -104,35 +77,35 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (usuario != null && senha != null) {
-            userInput.setText(usuario);
-            passInput.setText(senha);
-        }
-
-        builder.setCancelable(false);
-        login = builder.create();
-        login.show();
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (userInput.getText().toString().trim().length() > 0 && passInput.getText().toString().trim().length() > 0){
+                    hideKeyboard();
+                    makeLogin();
+                    passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    passInput.setSelection(passInput.length());
+                    passVisible = false;
+                }else {
+                    if (!(userInput.getText().toString().trim().length() > 0)){
+                        userInput.setError("Matricula");
+                    }
+                    if (!(passInput.getText().toString().trim().length() > 0)){
+                        passInput.setError("Senha");
+                    }
+                }
+            }
+        });
     }
 
-    private void makeLogin() {
+    public void makeLogin() {
         usuario = userInput.getText().toString().trim();
         senha = passInput.getText().toString();
-        boolean ok = true;
 
-        if (usuario.equals("")){
-            userInput.setError("Matricula");
-            ok = false;
-        }
-        if (senha.equals("")){
-            passInput.setError("Senha");
-            ok = false;
-        }
-
-        if (Conexao() != null && Conexao().isConnected() && ok){
+        if (Conexao() != null && Conexao().isConnected()){
             new AutenticacaoTask().execute();
         }else {
             Toast.makeText(getApplicationContext(), "Sem conexão!", Toast.LENGTH_LONG).show();
-            alertLogin();
         }
     }
 
@@ -186,7 +159,6 @@ public class MainActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (result == null){
                 //Não logado
-                alertLogin();
                 alertText("Verifique seus dados!");
             }else {
                 //Logado
@@ -211,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 .setMessage(dados)
                 .setIcon(getResources().getDrawable(R.drawable.ic_error_outline_red_24dp))
                 .setCancelable(true);
-        alerta = builder.create();
+        AlertDialog alerta = builder.create();
         alerta.show();
     }
 
