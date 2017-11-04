@@ -129,6 +129,7 @@ public class IntroActivity extends AppCompatActivity {
         protected void onPreExecute(){
             progressDialog = new ProgressDialog(IntroActivity.this);
             progressDialog.setTitle("Carregando salas!");
+            progressDialog.setCancelable(false);
             progressDialog.show();
         }
 

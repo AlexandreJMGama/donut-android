@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.json.JSONObject;
 
@@ -59,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
         passInput = (EditText) findViewById(R.id.password);
         passwordView = (ImageButton) findViewById(R.id.passView);
         btnLogin = (ImageButton) findViewById(R.id.logar);
+        Uri uri = Uri.parse("res:///"+ R.drawable.if_intro);
+        SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.introLogo);
+        draweeView.setImageURI(uri);
 
         passwordView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute(){
             progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setCancelable(false);
             progressDialog.show();
         }
 

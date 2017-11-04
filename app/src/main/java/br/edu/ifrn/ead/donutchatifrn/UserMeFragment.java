@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -42,7 +43,7 @@ public class UserMeFragment extends Fragment {
 
         SimpleDraweeView draweeView = (SimpleDraweeView) view.findViewById(R.id.sdvImage);
         TextView txtUser = (TextView) view.findViewById(R.id.tvname);
-        Button btnLogout = (Button) view.findViewById(R.id.btnLogout);
+        ImageButton btnLogout = (ImageButton) view.findViewById(R.id.btnLogout);
 
         orgDados();
 
