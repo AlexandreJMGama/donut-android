@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (usuario != null && accessToken != null) {
-            Intent intent = new Intent(this, IntroActivity.class);
+            Intent intent = new Intent(this, InfoActivity.class);
             startActivity(intent);
             finish();
         }
@@ -86,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (userInput.getText().toString().trim().length() > 0 && passInput.getText().toString().trim().length() > 0){
-                    hideKeyboard();
                     makeLogin();
                     passInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     passInput.setSelection(passInput.length());
@@ -149,10 +149,10 @@ public class MainActivity extends AppCompatActivity {
                         .get("https://donutchat.herokuapp.com/api/users/me")
                         .header("Authorization", "Token "+accessToken);
 
-                if (accessToken == null) {
-                    return null;
-                }else {
+                if (jsonMe.ok()) {
                     return jsonMe.body();
+                }else {
+                    return null;
                 }
 
             }catch (Exception e){
@@ -165,14 +165,110 @@ public class MainActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (result == null){
                 //Não logado
-                alertText("Verifique seus dados!");
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+                builder.setTitle("Erro")
+                        .setMessage("Verifique seus dados!")
+                        .setIcon(getResources().getDrawable(R.drawable.ic_error_outline_red_24dp))
+                        .setCancelable(true);
+                AlertDialog alerta = builder.create();
+                alerta.show();
             }else {
                 //Logado
                 userData.inserir(usuario, result, accessToken);
-                Intent intent = new Intent(getApplicationContext(), IntroActivity.class);
-                startActivity(intent);
-                finish();
+                new getRooms().execute();
             }
+        }
+    }
+
+    private class getRooms extends AsyncTask<Object, Object, String> {
+
+        ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute(){
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setTitle("Carregando salas!");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(Object... params) {
+            try {
+
+                HttpRequest jsonRoom = HttpRequest
+                        .get("https://donutchat.herokuapp.com/api/rooms")
+                        .header("Authorization", "Token "+accessToken);
+
+                if (jsonRoom.ok())
+                    return jsonRoom.body();
+                else
+                    return null;
+
+            }catch (Exception e){
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result != null){
+                //get ok
+                try {
+                    userData.atualizar(null, null, result);
+                    new getUsers().execute();
+                } catch (SQLiteException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                Toast.makeText(getApplicationContext(), "Erro", Toast.LENGTH_SHORT).show();
+            }
+            progressDialog.dismiss();
+        }
+    }
+
+    private class getUsers extends AsyncTask<Void, Void, String>{
+
+        ProgressDialog progressDialog;
+        @Override
+        protected void onPreExecute(){
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setTitle("Carregando usuários!");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+
+            HttpRequest jsonUsers = HttpRequest
+                    .get("https://donutchat.herokuapp.com/api/users")
+                    .header("Authorization", "Token "+accessToken);
+
+            if (jsonUsers.ok())
+                return jsonUsers.body();
+            else
+                return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            if (result != null){
+                //get ok
+                try {
+                    userData.atualizar(null, result, null);
+                    Intent intent = new Intent(getApplicationContext(), InfoActivity.class);
+                    startActivity(intent);
+                    finish();
+                } catch (SQLiteException e) {
+                    e.printStackTrace();
+                }
+
+            }else {
+                Toast.makeText(getApplicationContext(), "Erro", Toast.LENGTH_SHORT).show();
+            }
+            progressDialog.dismiss();
         }
     }
 
@@ -180,23 +276,5 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = cm.getActiveNetworkInfo();
         return info;
-    }
-
-    public void alertText(String dados) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setTitle("Erro")
-                .setMessage(dados)
-                .setIcon(getResources().getDrawable(R.drawable.ic_error_outline_red_24dp))
-                .setCancelable(true);
-        AlertDialog alerta = builder.create();
-        alerta.show();
-    }
-
-    protected void hideKeyboard() {
-        InputMethodManager inputManager = (InputMethodManager) this.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (inputManager.isActive()) {
-            inputManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
-        }
     }
 }
