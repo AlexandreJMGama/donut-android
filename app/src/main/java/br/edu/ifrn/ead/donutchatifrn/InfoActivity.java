@@ -1,5 +1,11 @@
 package br.edu.ifrn.ead.donutchatifrn;
 
+import android.content.Context;
+import android.content.Intent;
+import android.database.sqlite.SQLiteException;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -9,21 +15,30 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import br.edu.ifrn.ead.donutchatifrn.Banco.ControlUserData;
+
 public class InfoActivity extends AppCompatActivity {
 
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mViewPager;
+    private String accessToken;
+    ControlUserData userData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_info);
+
+        Intent intent = getIntent();
+        accessToken = intent.getStringExtra("token");
+        userData = new ControlUserData(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -43,6 +58,9 @@ public class InfoActivity extends AppCompatActivity {
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
+        if (Conexao() != null && Conexao().isConnected()){
+            new getUsers().execute();
+        }
     }
 
     @Override
@@ -97,5 +115,40 @@ public class InfoActivity extends AppCompatActivity {
                 .setCancelable(true);
         AlertDialog alerta = builder.create();
         alerta.show();
+    }
+
+    private class getUsers extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected String doInBackground(Void... voids) {
+
+            HttpRequest jsonUsers = HttpRequest
+                    .get("https://donutchat.herokuapp.com/api/users")
+                    .header("Authorization", "Token "+accessToken);
+
+            if (jsonUsers.ok())
+                return jsonUsers.body();
+            else
+                return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result != null){
+                //get ok
+                try {
+                    userData.atualizar(null, result, null);
+                    Log.i("::CHECK", "Atualizando usuarios!");
+                } catch (SQLiteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private NetworkInfo Conexao() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return info;
     }
 }

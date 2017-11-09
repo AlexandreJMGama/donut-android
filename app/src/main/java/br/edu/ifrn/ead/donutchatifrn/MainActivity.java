@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (usuario != null && accessToken != null) {
             Intent intent = new Intent(this, InfoActivity.class);
+            intent.putExtra("token", accessToken);
             startActivity(intent);
             finish();
         }
@@ -62,9 +63,6 @@ public class MainActivity extends AppCompatActivity {
         passInput = (EditText) findViewById(R.id.password);
         passwordView = (ImageButton) findViewById(R.id.passView);
         btnLogin = (ImageButton) findViewById(R.id.logar);
-        Uri uri = Uri.parse("res:///"+ R.drawable.if_intro);
-        SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.introLogo);
-        draweeView.setImageURI(uri);
 
         passwordView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     userData.atualizar(null, result, null);
                     Intent intent = new Intent(getApplicationContext(), InfoActivity.class);
+                    intent.putExtra("token", accessToken);
                     startActivity(intent);
                     finish();
                 } catch (SQLiteException e) {
